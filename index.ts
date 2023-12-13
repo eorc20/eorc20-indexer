@@ -6,6 +6,7 @@ import { BlockEmitter, createNodeTransport } from "@substreams/node";
 import { token, baseUrl, manifest, outputModule, params, startBlockNum, stopBlockNum } from "./src/config.js";
 import { readCursor, saveCursor } from "./src/utils.js";
 import { blockNumberFromGenesis, toTransactionId } from "./src/evm.js";
+import { rlptxToOpCode } from "./src/eorc.js";
 
 // Read Substream
 const substreamPackage = await readPackage(manifest);
@@ -21,6 +22,7 @@ const request = createRequest({
   startBlockNum,
   stopBlockNum,
   startCursor: readCursor(),
+  finalBlocksOnly: true,
 });
 
 // NodeJS Events
@@ -30,43 +32,53 @@ export interface Download {
   evm_trx_id: string;
   eos_trx_id: string;
   eos_block_number: number;
+  evm_block_number: number;
   timestamp: string;
   miner: string;
   rlptx: string;
 }
 
 let start = 0;
-let timestamp = 0
+let timestamp = 0;
 let pushtx = 0;
 let blocks = 0;
 
 // Stream Blocks
-const writer = fs.createWriteStream("pushtx.jsonl", {flags: "a"});
+const pushtx_writer = fs.createWriteStream("pushtx.jsonl", {flags: "a"});
+const blocks_writer = fs.createWriteStream("blocks.jsonl", {flags: "a"});
+const eorc_writer = fs.createWriteStream("eorc.jsonl", {flags: "a"});
+
 emitter.on("anyMessage", (message: any, cursor, clock) => {
+  if ( !clock.timestamp ) return;
+  const evm_block_number = blockNumberFromGenesis(clock.timestamp?.toDate());
+
   if (!message.transactionTraces) return;
   for ( const trace of message.transactionTraces ) {
     if ( !trace.actionTraces ) continue;
     for ( const action of trace.actionTraces) {
       if ( action.action.name !== "pushtx" ) continue;
       const { miner, rlptx } = JSON.parse(action.action.jsonData);
+
+      const evm_trx_id = toTransactionId(`0x${rlptx}`);
       const row: Download = {
-        evm_trx_id: toTransactionId(`0x${rlptx}`),
+        evm_trx_id,
         eos_trx_id: trace.id,
         eos_block_number: trace.blockNum,
+        evm_block_number,
         timestamp: trace.blockTime,
         miner,
         rlptx,
       }
-      writer.write(JSON.stringify(row) + "\n");
+      pushtx_writer.write(JSON.stringify(row) + "\n");
 
       // logging
       const now = Math.floor(Date.now() / 1000);
+      const date = trace.blockTime.split(".")[0] + "Z";
       if ( start === 0 ) start = now;
       pushtx += 1;
       if ( timestamp !== now ) {
         timestamp = now;
         const elapsed = (timestamp - start);
-        const date = trace.blockTime.split(".")[0].replace("Z", "");
 
         // op codes
         const op_rate = Math.floor(pushtx / elapsed);
@@ -77,7 +89,6 @@ emitter.on("anyMessage", (message: any, cursor, clock) => {
         // blocks
         const blocks_rate = Math.floor(blocks / elapsed / 2);
         const blocks_remaining = Math.floor((stopBlockNum - trace.blockNum)/2);
-        const blocks_current = blockNumberFromGenesis(trace.blockTime);
 
         logUpdate([
           "EORC",
@@ -97,15 +108,24 @@ emitter.on("anyMessage", (message: any, cursor, clock) => {
           `count: ${blocks}`,
           `rate: ${blocks_rate}/s`,
           `remaining: ${blocks_remaining}`,
-          `current: ${blocks_current}`
+          `current: ${evm_block_number}`
         ].join("\n"));
       }
+
+      // EORC handling
+      const eorc = rlptxToOpCode(`0x${rlptx}`);
+      if ( !eorc ) continue;
+      eorc_writer.write(JSON.stringify({...eorc, timestamp: date, block_number: evm_block_number, trx_id: evm_trx_id}) + "\n");
     }
   }
 });
 
-emitter.on("cursor", (cursor) => {
+emitter.on("cursor", (cursor, clock) => {
   saveCursor(cursor);
+  if ( !clock.timestamp ) return;
+  const timestamp = clock.timestamp?.toDate();
+  const evm_block_number = blockNumberFromGenesis(timestamp);
+  blocks_writer.write(JSON.stringify({timestamp, evm_block_number, eos_block_number: Number(clock.number), eos_block_id: clock.id }) + "\n");
   blocks+=1;
 });
 

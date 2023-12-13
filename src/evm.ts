@@ -6,8 +6,8 @@ export function toTransactionId(rlptx: Address) {
     return keccak256(value);
 }
 
-export function blockNumberFromGenesis(blockTime: string) {
-    const genesis = Math.floor(new Date(LOCK_GENESIS_TIME).valueOf() / 1000);
-    const current = Math.floor(new Date(blockTime).valueOf() / 1000)
+export function blockNumberFromGenesis(blockTime: Date) {
+    const current = Math.floor(blockTime.valueOf() / 1000)
+    const genesis = Math.floor(LOCK_GENESIS_TIME.valueOf() / 1000);
     return current - genesis + 1;
 }
