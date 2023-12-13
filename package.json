@@ -1,0 +1,36 @@
+{
+  "private": true,
+  "version": "0.1.0",
+  "name": "eorc",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "eorc": "dist/bin/cli.js"
+  },
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "default": "./dist/index.js",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "start": "tsc && node --env-file=.env ./dist/index.js",
+    "pretest": "tsc --noEmit",
+    "test": "bun test",
+    "prepublishOnly": "tsc"
+  },
+  "dependencies": {
+    "@substreams/core": "^0.8.0",
+    "@substreams/manifest": "^0.7.0",
+    "@substreams/node": "^0.5.0",
+    "log-update": "latest",
+    "viem": "latest"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "typescript": "latest"
+  }
+}
