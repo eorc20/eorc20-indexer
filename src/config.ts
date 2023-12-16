@@ -37,3 +37,4 @@ export const writers = {
 }
 
 export const VERBOSE = true;
+export const PAUSED = process.env.PAUSED === "true";

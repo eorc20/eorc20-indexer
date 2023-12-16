@@ -1,6 +1,6 @@
 import { readPackage } from "@substreams/manifest";
 import { createRegistry, createRequest, applyParams } from "@substreams/core";
-import { BlockEmitter, createNodeTransport } from "@substreams/node";
+import { BlockEmitter, createWebTransport } from "@substreams/node";
 import { token, baseUrl, manifest, outputModule, params, startBlockNum } from "./config.js";
 import { readCursor } from "./utils.js";
 
@@ -11,7 +11,7 @@ applyParams([params], substreamPackage.modules.modules);
 
 // Connect Transport
 const registry = createRegistry(substreamPackage);
-const transport = createNodeTransport(baseUrl, token, registry);
+const transport = createWebTransport(baseUrl, token, registry);
 const request = createRequest({
   substreamPackage,
   outputModule,
@@ -19,6 +19,7 @@ const request = createRequest({
   // stopBlockNum,
   startCursor: readCursor(),
   finalBlocksOnly: true,
+  // productionMode: true,
 });
 
 // NodeJS Events

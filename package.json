@@ -19,9 +19,10 @@
     }
   },
   "scripts": {
-    "start": "tsc && node ./dist/index.js",
-    "pretest": "tsc --noEmit",
+    "start": "bun index.ts",
+    "dev": "bun --watch index.ts",
     "test": "bun test",
+    "posttest": "tsc --noEmit",
     "prepublishOnly": "tsc"
   },
   "dependencies": {

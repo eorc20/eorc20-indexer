@@ -1,9 +1,4 @@
-FROM node:alpine
-
-EXPOSE 8080
-
-COPY package*.json ./
-RUN npm ci
+FROM oven/bun
 COPY . .
-
-ENTRYPOINT ["npm", "start"]
+RUN bun install
+ENTRYPOINT [ "bun", "./index.ts" ]

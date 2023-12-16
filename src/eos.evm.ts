@@ -1,7 +1,7 @@
 import { keccak256, Hex, parseTransaction, signatureToHex, serializeTransaction, recoverAddress, recoverPublicKey } from 'viem'
 import { LOCK_GENESIS_TIME } from './config.js';
 
-export function toTransactionId(rlptx: Hex) {
+export function toTransactionId(rlptx: Hex): Hex {
     return keccak256(rlptx);
 }
 

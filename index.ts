@@ -2,10 +2,11 @@
 
 import { saveCursor } from "./src/utils.js";
 import { blockNumberFromGenesis, getFromAddress, toTransactionId } from "./src/eos.evm.js";
-import { rlptxToOpCode } from "./src/eorc20.js";
+import { contentUriToSha256, parseOpCode, rlptxToTransaction, getMimeType } from "./src/eorc20.js";
 import { emitter } from "./src/substreams.js";
-import { writers } from "./src/config.js";
+import { PAUSED, writers } from "./src/config.js";
 import logUpdate from "log-update";
+import { Hex } from "viem";
 
 let total = 0;
 const start = Math.floor(Date.now().valueOf() / 1000);
@@ -18,17 +19,22 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
 
   if (!message.transactionTraces) return;
   for ( const trace of message.transactionTraces ) {
+    if ( trace.receipt.status !== "TRANSACTIONSTATUS_EXECUTED") return;
     if ( !trace.actionTraces ) continue;
     for ( const action of trace.actionTraces) {
       if ( action.action.name !== "pushtx" ) continue;
-      const { miner, rlptx } = JSON.parse(action.action.jsonData);
-      const trx_id = toTransactionId(`0x${rlptx}`);
+      const jsonData = JSON.parse(action.action.jsonData);
+      const miner = jsonData.miner;
+      const rlptx: Hex = `0x${jsonData.rlptx}`;
+      const transaction_hash = toTransactionId(rlptx);
+      const transaction_index = trace.index;
 
       // // EOS EVM push transaction
       // writers.pushtx.write(JSON.stringify({
       //   trx_id,
       //   timestamp: trace.blockTime,
       //   block_number,
+      //   transaction_index,
       //   eos_trx_id: trace.id,
       //   eos_block_number: trace.blockNum,
       //   miner,
@@ -36,16 +42,35 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
       // }) + "\n");
 
       // EORC-20 handling
-      const data = rlptxToOpCode(`0x${rlptx}`);
+      const tx = rlptxToTransaction(rlptx);
+      if ( !tx ) continue;
+      if ( !tx.to ) continue;
+      if ( !tx.data ) continue;
+      const content_uri = tx.data;
+      const data = parseOpCode(content_uri);
       if ( !data ) continue;
-      const from = await getFromAddress(`0x${rlptx}`);
+      const from = await getFromAddress(rlptx);
+      const sha = contentUriToSha256(content_uri);
+      const value = tx.value?.toString();
+      const gas = tx.gas?.toString();
+      const gas_price = tx.gasPrice?.toString();
 
       writers.eorc.write(JSON.stringify({
-        from,
-        ...data,
-        timestamp,
+        transaction_hash,
         block_number,
-        trx_id,
+        timestamp,
+        to: tx.to,
+        from,
+        data,
+        value,
+        nonce: tx.nonce,
+        ...getMimeType(content_uri),
+        transaction_index,
+        content_uri,
+        gas,
+        gas_price,
+        sha,
+        miner,
       }) + "\n");
 
       // Update progress
@@ -79,12 +104,17 @@ emitter.on("fatalError", (error) => {
   console.error(error);
 });
 
+if ( PAUSED ) {
+  console.log("Paused");
+  process.exit();
+}
+
 const cancelFn = emitter.start();
 console.log("EORC-20 indexer 🚀");
 
 // Handle user exit
 process.on("SIGINT", () => {
-  console.log("closing...");
+  console.log("Ctrl-C was pressed");
   cancelFn();
   process.exit();
 });
