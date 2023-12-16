@@ -70,9 +70,6 @@ export function parseOpCode(data: Address) {
             if ( !Number.isInteger(Number(max))) return null;
         }
 
-        // custom filters
-        if ( TICKERS.length && !TICKERS.includes(tick) ) return null;
-
         return parsedOp;
     } catch (e) {
         return null;

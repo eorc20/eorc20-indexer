@@ -8,12 +8,12 @@ export function clockToDay(clock: Clock) {
 }
 
 export function readCursor() {
-    if ( fs.existsSync("cursor.lock") ) {
-        return fs.readFileSync("cursor.lock", "utf8");
+    if ( fs.existsSync("data/cursor.lock") ) {
+        return fs.readFileSync("data/cursor.lock", "utf8");
     }
     return undefined;
 }
 
 export function saveCursor(cursor: string) {
-    fs.writeFileSync("cursor.lock", cursor);
+    fs.writeFileSync("data/cursor.lock", cursor);
 }

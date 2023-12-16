@@ -24,11 +24,16 @@ export const LOCK_GENESIS_TIME = new Date("2023-04-05T02:18:09Z");
 // EORC
 export const TICKERS = (process.env.TICKERS ?? "eoss").split(",")
 
+// create data folder
+if ( !fs.existsSync("data")) {
+    fs.mkdirSync("data");
+}
+
 // Stream Blocks
 export const writers = {
-    eorc: fs.createWriteStream("eorc20.jsonl", {flags: "a"}),
-    blocks: fs.createWriteStream("blocks.jsonl", {flags: "a"}),
-    pushtx: fs.createWriteStream("pushtx.jsonl", {flags: "a"}),
+    eorc: fs.createWriteStream("data/eorc20.jsonl", {flags: "a"}),
+    blocks: fs.createWriteStream("data/blocks.jsonl", {flags: "a"}),
+    pushtx: fs.createWriteStream("data/pushtx.jsonl", {flags: "a"}),
 }
 
 export const VERBOSE = true;
