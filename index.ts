@@ -24,16 +24,16 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
       const { miner, rlptx } = JSON.parse(action.action.jsonData);
       const trx_id = toTransactionId(`0x${rlptx}`);
 
-      // EOS EVM push transaction
-      writers.pushtx.write(JSON.stringify({
-        trx_id,
-        timestamp: trace.blockTime,
-        block_number,
-        eos_trx_id: trace.id,
-        eos_block_number: trace.blockNum,
-        miner,
-        rlptx,
-      }) + "\n");
+      // // EOS EVM push transaction
+      // writers.pushtx.write(JSON.stringify({
+      //   trx_id,
+      //   timestamp: trace.blockTime,
+      //   block_number,
+      //   eos_trx_id: trace.id,
+      //   eos_block_number: trace.blockNum,
+      //   miner,
+      //   rlptx,
+      // }) + "\n");
 
       // EORC-20 handling
       const data = rlptxToOpCode(`0x${rlptx}`);
@@ -52,7 +52,7 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
       const now = Math.floor(Date.now().valueOf() / 1000);
       total++;
       const rate = total / (now - start);
-      if ( last !== now ) logUpdate(`Processed ${total} EORC-20 operations at ${rate.toFixed(2)} op/s`);
+      if ( last !== now ) logUpdate(`Processed ${total} EORC-20 operations at ${rate.toFixed(2)} op/s (last block: ${block_number})`);
       last = now
     }
   }

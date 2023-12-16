@@ -33,7 +33,7 @@ if ( !fs.existsSync("data")) {
 export const writers = {
     eorc: fs.createWriteStream("data/eorc20.jsonl", {flags: "a"}),
     blocks: fs.createWriteStream("data/blocks.jsonl", {flags: "a"}),
-    pushtx: fs.createWriteStream("data/pushtx.jsonl", {flags: "a"}),
+    // pushtx: fs.createWriteStream("data/pushtx.jsonl", {flags: "a"}),
 }
 
 export const VERBOSE = true;
