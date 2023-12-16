@@ -25,11 +25,26 @@ export function parseOpCode(data: Address) {
     const opCode = str.split("data:,")[1];
     if ( !opCode ) return null;
     try {
-        const op = JSON.parse(opCode);
-        if ( op.p !== "eorc20" ) return null;
-        if ( !op.op ) return null;
-        if ( !op.tick ) return null;
-        return op;
+        const parsedOp = JSON.parse(opCode);
+        const { p, tick, op, amt, max } = parsedOp;
+
+        // eorc-20 operations
+        if ( !p || !tick || !op ) return null;
+        if ( p !== "eorc20" ) return null;
+        if ( !["deploy", "mint", "transfer"].includes(op) ) return null;
+        if ( tick.length !== 4 ) return null;
+
+        // required fields
+        if ( ["transfer","mint"].includes(op)) {
+            if ( amt === undefined ) return null;
+            if ( !Number.isInteger(Number(amt))) return null;
+        }
+
+        if ( op === "deploy") {
+            if ( max === undefined ) return null;
+            if ( !Number.isInteger(Number(max))) return null;
+        }
+        return parsedOp;
     } catch (e) {
         return null;
     }
