@@ -12,8 +12,8 @@ export const baseUrl = "https://eos.substreams.pinax.network:443";
 export const manifest = "https://github.com/pinax-network/substreams/releases/download/common-v0.6.0/common-v0.6.0.spkg";
 export const outputModule = "map_transaction_traces";
 export const params = `map_action_traces=contract=eosio.evm&action=pushtx`;
-export const startBlockNum = 345760000;
-export const stopBlockNum = 346500000;
+export const startBlockNum = 345827395;
+export const stopBlockNum = startBlockNum + 2;
 
 // EOS EVM
 export const LOCK_GENESIS_TIME = new Date("2023-04-05T02:18:09Z");

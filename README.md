@@ -1,6 +1,6 @@
-# `EORC-20` CLI
+# `EORC-20` Indexer
 
-> CLI to allow streaming [EORC-20](https://eorc20.com/) events to **stdout**.
+> Allows to index `EORC-20` inscription op codes from EOS EVM blocks.
 
 ## Install
 
@@ -11,5 +11,19 @@ $ npm -g install eorc20
 ## Usage
 
 ```bash
-$ eorc20 --start-block 346499067
+$ eorc20 --eos-start-block 345827395 --ticker eoss
+```
+
+Outputs the following JSONL files to disk:
+- `eorc.jsonl` (EORC-20 events)
+- `blocks.jsonl` (EOS EVM blocks)
+
+### Get API key
+
+- https://app.pinax.network/
+
+**.env**
+```env
+SUBSTREAMS_API_TOKEN="<API KEY>"
+EOS_START_BLOCK=345827395
 ```

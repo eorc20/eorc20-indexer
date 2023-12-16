@@ -44,9 +44,9 @@ let pushtx = 0;
 let blocks = 0;
 
 // Stream Blocks
-const pushtx_writer = fs.createWriteStream("pushtx.jsonl", {flags: "a"});
-const blocks_writer = fs.createWriteStream("blocks.jsonl", {flags: "a"});
-const eorc_writer = fs.createWriteStream("eorc.jsonl", {flags: "a"});
+const pushtx_writer = fs.createWriteStream("pushtx2.jsonl", {flags: "a"});
+const blocks_writer = fs.createWriteStream("blocks3.jsonl", {flags: "a"});
+const eorc_writer = fs.createWriteStream("eorc3.jsonl", {flags: "a"});
 
 emitter.on("anyMessage", (message: any, cursor, clock) => {
   if ( !clock.timestamp ) return;
@@ -73,7 +73,7 @@ emitter.on("anyMessage", (message: any, cursor, clock) => {
 
       // logging
       const now = Math.floor(Date.now() / 1000);
-      const date = trace.blockTime.split(".")[0] + "Z";
+      const date = trace.blockTime.replace(/\.[50]00Z/, "Z");
       if ( start === 0 ) start = now;
       pushtx += 1;
       if ( timestamp !== now ) {
@@ -115,7 +115,12 @@ emitter.on("anyMessage", (message: any, cursor, clock) => {
       // EORC handling
       const eorc = rlptxToOpCode(`0x${rlptx}`);
       if ( !eorc ) continue;
-      eorc_writer.write(JSON.stringify({...eorc, timestamp: date, block_number: evm_block_number, trx_id: evm_trx_id}) + "\n");
+      eorc_writer.write(JSON.stringify({
+        ...eorc,
+        timestamp: date,
+        block_number: evm_block_number,
+        trx_id: evm_trx_id,
+      }) + "\n");
     }
   }
 });

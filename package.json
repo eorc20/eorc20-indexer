@@ -8,7 +8,9 @@
   "bin": {
     "eorc": "dist/bin/cli.js"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "default": "./dist/index.js",
@@ -26,7 +28,9 @@
     "@substreams/core": "^0.8.0",
     "@substreams/manifest": "^0.7.0",
     "@substreams/node": "^0.5.0",
+    "ethers": "^6.9.0",
     "log-update": "latest",
+    "p-queue": "^8.0.0",
     "viem": "latest"
   },
   "devDependencies": {
