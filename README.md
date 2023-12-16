@@ -24,6 +24,8 @@ Outputs the following JSONL files to disk:
 
 **.env**
 ```env
+# Get API key @ app.pinax.network
 SUBSTREAMS_API_TOKEN="<API KEY>"
+TICKERS="eoss"
 EOS_START_BLOCK=345827395
 ```
