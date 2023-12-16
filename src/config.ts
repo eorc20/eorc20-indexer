@@ -1,4 +1,5 @@
 import fs from "fs";
+import "dotenv/config";
 
 // auth API token
 // https://app.streamingfast.io/

@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { saveCursor } from "./src/utils.js";
 import { blockNumberFromGenesis, getFromAddress, toTransactionId } from "./src/eos.evm.js";
 import { rlptxToOpCode } from "./src/eorc20.js";

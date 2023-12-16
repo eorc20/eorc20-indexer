@@ -1,12 +1,12 @@
 {
-  "private": true,
   "version": "0.1.0",
   "name": "eorc",
+  "description": "EORC-20 indexer",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "eorc": "dist/bin/cli.js"
+    "eorc": "dist/index.js"
   },
   "files": [
     "dist"
@@ -28,9 +28,9 @@
     "@substreams/core": "^0.8.0",
     "@substreams/manifest": "^0.7.0",
     "@substreams/node": "^0.5.0",
-    "ethers": "^6.9.0",
+    "dotenv": "latest",
     "log-update": "latest",
-    "p-queue": "^8.0.0",
+    "p-queue": "latest",
     "viem": "latest"
   },
   "devDependencies": {
