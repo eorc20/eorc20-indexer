@@ -1,4 +1,5 @@
 import { Address, TransactionSerializableLegacy, fromHex, parseTransaction } from "viem";
+import { TICKERS } from "./config.js";
 
 export function rlptxToOpCode(rlptx: Address) {
     let tx: TransactionSerializableLegacy
@@ -39,11 +40,14 @@ export function parseOpCode(data: Address) {
             if ( amt === undefined ) return null;
             if ( !Number.isInteger(Number(amt))) return null;
         }
-
         if ( op === "deploy") {
             if ( max === undefined ) return null;
             if ( !Number.isInteger(Number(max))) return null;
         }
+
+        // custom filters
+        if ( TICKERS.length && !TICKERS.includes(tick) ) return null;
+
         return parsedOp;
     } catch (e) {
         return null;

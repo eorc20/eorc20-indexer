@@ -21,7 +21,9 @@ export async function getFromAddress(rlptx: Hex) {
     const v = tx.v - 17777n * 2n - 35n;
     const signature = signatureToHex({ v, r: tx.r, s: tx.s });
     const hash = keccak256(serializeTransaction({ ...tx }));
-    return recoverAddress({hash, signature});
+    const addres = await recoverAddress({hash, signature});
+    if ( !addres ) return null;
+    return addres.toLowerCase();
 }
 
 // getFromAddress("0xf7824f468522ecb25c0082520894d10ca73e34fc6c7c530654cb9adb0810e7771320890579848dee9ab30000801b80885530ea015b900000").then(console.log);

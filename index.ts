@@ -29,13 +29,13 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
       }) + "\n");
 
       // EORC handling
-      const eorc = rlptxToOpCode(`0x${rlptx}`);
-      if ( !eorc ) continue;
+      const data = rlptxToOpCode(`0x${rlptx}`);
+      if ( !data ) continue;
       const from = await getFromAddress(`0x${rlptx}`);
-      console.log({from, eorc})
+      console.log({from, ...data})
       writers.eorc.write(JSON.stringify({
         from,
-        ...eorc,
+        ...data,
         timestamp,
         block_number,
         trx_id,
