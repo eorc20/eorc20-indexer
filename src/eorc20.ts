@@ -1,6 +1,31 @@
 import { Address, TransactionSerializableLegacy, fromHex, parseTransaction } from "viem";
 import { TICKERS } from "./config.js";
 
+export type Ticker = string;
+
+export interface OpCode {
+    from: Address;  // '0x4ce47b001f40438c4ccd5188a7f688023be301b2'
+    to: Address;    // '0x4ce47b001f40438c4ccd5188a7f688023be301b2'
+    p: string;      // 'eorc20'
+    tick: Ticker;   // 'eoss'
+}
+
+export interface MintOpCode extends OpCode {
+    op: "mint";
+    amt: string;    // '10000'
+}
+
+export interface TransferOpCode extends OpCode {
+    op: "transfer";
+    amt: string;    // '10000'
+}
+
+export interface DeployOpCode extends OpCode {
+    op: "deploy";
+    max: string;    // '210000000000'
+    lim?: string;    // '10000'
+}
+
 export function rlptxToOpCode(rlptx: Address) {
     let tx: TransactionSerializableLegacy
     try {

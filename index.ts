@@ -1,8 +1,13 @@
 import { saveCursor } from "./src/utils.js";
 import { blockNumberFromGenesis, getFromAddress, toTransactionId } from "./src/eos.evm.js";
-import { rlptxToOpCode } from "./src/eorc.js";
+import { rlptxToOpCode } from "./src/eorc20.js";
 import { emitter } from "./src/substreams.js";
 import { writers } from "./src/config.js";
+import logUpdate from "log-update";
+
+let total = 0;
+const start = Math.floor(Date.now().valueOf() / 1000);
+let last = start;
 
 emitter.on("anyMessage", async (message: any, cursor, clock) => {
   if ( !clock.timestamp ) return;
@@ -28,11 +33,11 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
         rlptx,
       }) + "\n");
 
-      // EORC handling
+      // EORC-20 handling
       const data = rlptxToOpCode(`0x${rlptx}`);
       if ( !data ) continue;
       const from = await getFromAddress(`0x${rlptx}`);
-      console.log({from, ...data})
+
       writers.eorc.write(JSON.stringify({
         from,
         ...data,
@@ -40,6 +45,13 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
         block_number,
         trx_id,
       }) + "\n");
+
+      // Update progress
+      const now = Math.floor(Date.now().valueOf() / 1000);
+      total++;
+      const rate = total / (now - start);
+      if ( last !== now ) logUpdate(`Processed ${total} EORC-20 operations at ${rate.toFixed(2)} op/s`);
+      last = now
     }
   }
 
@@ -65,4 +77,12 @@ emitter.on("fatalError", (error) => {
   console.error(error);
 });
 
-emitter.start();
+const cancelFn = emitter.start();
+console.log("EORC-20 indexer 🚀");
+
+// Handle user exit
+process.on("SIGINT", () => {
+  console.log("closing...");
+  cancelFn();
+  process.exit();
+});
