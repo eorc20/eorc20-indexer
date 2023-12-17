@@ -5,7 +5,8 @@ import GET from "./src/fetch/GET.js";
 import OPTIONS from "./src/fetch/OPTIONS.js";
 import POST from "./src/fetch/POST.js";
 import { NotFound } from "./src/fetch/cors.js";
-import { start } from "./src/substreams.js";
+import { emitter } from "./src/BlockEmitter.js";
+import "./src/substreams.js"
 import { scan } from "./src/scan.js"
 
 // Scan existing inscriptions and index them before starting the server
@@ -15,7 +16,8 @@ if ( !IGNORE_SCAN ) {
 
 // Start indexing with substreams
 if (!HTTP_ONLY ) {
-  start();
+  emitter.start();
+  console.log("EORC-20 indexer 🚀");
 }
 
 if ( PAUSED ) {

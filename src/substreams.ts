@@ -18,6 +18,12 @@ const init_timestamp = Math.floor(Date.now().valueOf() / 1000);
 let last_timestamp = init_timestamp;
 
 emitter.on("anyMessage", async (message: any, cursor, clock) => {
+  // if ( queue.size > 100 ) {
+  //   if ( emitter.cancelFn ) {
+  //     console.log("Queue is full, pausing emitter");
+  //     emitter.cancelFn();
+  //   }
+  // }
   queue.add(async () => {
     if ( !clock.timestamp ) return;
     const block_number = blockNumberFromGenesis(clock.timestamp?.toDate());
@@ -88,15 +94,24 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
 
         // Save cursor
         saveCursor(cursor);
-        writers.blocks.write(JSON.stringify({
-          timestamp,
-          block_number,
-          eos_block_number: Number(clock.number),
-          eos_block_id: clock.id
-        }) + "\n");
+        // writers.blocks.write(JSON.stringify({
+        //   timestamp,
+        //   block_number,
+        //   eos_block_number: Number(clock.number),
+        //   eos_block_id: clock.id
+        // }) + "\n");
     }
   })
 });
+
+// // restart processing when queue is idle
+// queue.on("completed", () => {
+//   console.log("Queue is completed")
+//   if ( !emitter.cancelFn ) {
+//     console.log("Restarting emitter")
+//     emitter.start();
+//   }
+// });
 
 // End of Stream
 emitter.on("close", (error) => {
@@ -111,15 +126,13 @@ emitter.on("fatalError", (error) => {
   process.exit(70);
 });
 
-export function start() {
-  const cancelFn = emitter.start();
-  console.log("EORC-20 indexer 🚀");
 
-  // Handle user exit
-  // https://github.com/dotnet/templating/wiki/Exit-Codes
-  process.on("SIGINT", () => {
-    console.log("Ctrl-C was pressed");
-    cancelFn();
-    process.exit(130);
-  });
-}
+// Handle user exit
+// https://github.com/dotnet/templating/wiki/Exit-Codes
+process.on("SIGINT", () => {
+  console.log("Ctrl-C was pressed");
+  if (emitter.cancelFn) {
+    emitter.cancelFn();
+  }
+  process.exit(130);
+});
