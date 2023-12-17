@@ -38,3 +38,4 @@ export const writers = {
 
 export const VERBOSE = true;
 export const PAUSED = process.env.PAUSED === "true";
+export const PORT = Number(process.env.PORT ?? "3000");

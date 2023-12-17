@@ -1,0 +1,104 @@
+{
+    "code": 1,
+    "data": {
+        "list": [
+            {
+                "id": 393836,
+                "address": "0x1d014fe01f1a12846d51a997bfbaa0b8c16aa68a",
+                "tick": "IERC 20",
+                "balance": "1000000",
+                "hold": "0",
+                "decimals": 8,
+                "workc": "",
+                "protocol": "IERC-20",
+                "created_at": "2023-12-13T04:24:28Z",
+                "updated_at": "2023-12-13T04:24:28Z"
+            },
+            {
+                "id": 375123,
+                "address": "0x1d014fe01f1a12846d51a997bfbaa0b8c16aa68a",
+                "tick": "MGSS",
+                "balance": "999",
+                "hold": "0",
+                "decimals": 8,
+                "workc": "",
+                "protocol": "IERC-20",
+                "created_at": "2023-12-05T13:29:37Z",
+                "updated_at": "2023-12-05T13:29:37Z"
+            },
+            {
+                "id": 370797,
+                "address": "0x1d014fe01f1a12846d51a997bfbaa0b8c16aa68a",
+                "tick": "ierc-m4",
+                "balance": "88",
+                "hold": "0",
+                "decimals": 8,
+                "workc": "0x0000",
+                "protocol": "IERC(miner)-20",
+                "created_at": "2023-11-30T12:38:26Z",
+                "updated_at": "2023-11-30T12:38:26Z"
+            },
+            {
+                "id": 364223,
+                "address": "0x1d014fe01f1a12846d51a997bfbaa0b8c16aa68a",
+                "tick": "Swagga Inscription",
+                "balance": "18333.33333",
+                "hold": "0",
+                "decimals": 8,
+                "workc": "",
+                "protocol": "IERC-20",
+                "created_at": "2023-11-28T12:02:36Z",
+                "updated_at": "2023-11-28T12:02:36Z"
+            },
+            {
+                "id": 130226,
+                "address": "0x1d014fe01f1a12846d51a997bfbaa0b8c16aa68a",
+                "tick": "erc20",
+                "balance": "888",
+                "hold": "0",
+                "decimals": 8,
+                "workc": "",
+                "protocol": "IERC-20",
+                "created_at": "2023-11-18T04:24:28Z",
+                "updated_at": "2023-11-18T04:24:28Z"
+            },
+            {
+                "id": 118816,
+                "address": "0x1d014fe01f1a12846d51a997bfbaa0b8c16aa68a",
+                "tick": "Sparkle Inscription",
+                "balance": "18333",
+                "hold": "0",
+                "decimals": 8,
+                "workc": "",
+                "protocol": "IERC-20",
+                "created_at": "2023-11-14T11:10:14Z",
+                "updated_at": "2023-11-14T11:10:14Z"
+            },
+            {
+                "id": 91018,
+                "address": "0x1d014fe01f1a12846d51a997bfbaa0b8c16aa68a",
+                "tick": "LOLI",
+                "balance": "80",
+                "hold": "0",
+                "decimals": 8,
+                "workc": "",
+                "protocol": "IERC-20",
+                "created_at": "2023-11-11T09:44:29Z",
+                "updated_at": "2023-11-11T09:44:29Z"
+            },
+            {
+                "id": 23662,
+                "address": "0x1d014fe01f1a12846d51a997bfbaa0b8c16aa68a",
+                "tick": "ethi",
+                "balance": "154000",
+                "hold": "0",
+                "decimals": 8,
+                "workc": "",
+                "protocol": "IERC-20",
+                "created_at": "2023-11-08T06:57:00Z",
+                "updated_at": "2023-11-08T06:58:11Z"
+            }
+        ],
+        "total": 8
+    }
+}
