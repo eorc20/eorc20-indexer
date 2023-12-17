@@ -1,9 +1,9 @@
 import { Address, Hex } from "viem";
 import { Ticker } from "../eorc20.js";
 
-export type Balance = Map<Ticker, number>;
+export type Balances = Map<Ticker, bigint>;
 
-export const BALANCES = new Map<Address, Balance>();
+export const BALANCES = new Map<Address, Balances>();
 
 export function getBalance(address: Hex, ticker: string) {
     const balances = BALANCES.get(address);

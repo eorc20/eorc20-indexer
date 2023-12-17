@@ -4,6 +4,7 @@ import { EORC20_PATH } from "./config.js";
 import { InscriptionRawData } from "./schemas.js";
 import { handleOpCode } from "./operations/index.js";
 import { parseOpCode } from "./eorc20.js";
+import { Address, Hex } from "viem";
 
 export async function scan() {
     console.log("Scanning inscriptions...");
@@ -15,9 +16,9 @@ export async function scan() {
             crlfDelay: Infinity
         });
         rl.on('line', (line) => {
-            const row = JSON.parse(line) as InscriptionRawData;
-            const opCode = parseOpCode(row.content);
-            handleOpCode(opCode);
+            const {id, from, to, content, timestamp} = JSON.parse(line) as InscriptionRawData;
+            const opCode = parseOpCode(content);
+            handleOpCode(id as Hex, from as Address, to as Address, opCode, timestamp);
             operations++;
         });
 

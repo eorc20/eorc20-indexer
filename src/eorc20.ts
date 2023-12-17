@@ -4,8 +4,8 @@ import { Address, Hex, TransactionSerializableLegacy, fromHex, parseTransaction 
 export type Ticker = string;
 
 export interface OpCode {
-    from: Address;  // '0x4ce47b001f40438c4ccd5188a7f688023be301b2'
-    to: Address;    // '0x4ce47b001f40438c4ccd5188a7f688023be301b2'
+    // from: Address;  // '0x4ce47b001f40438c4ccd5188a7f688023be301b2'
+    // to: Address;    // '0x4ce47b001f40438c4ccd5188a7f688023be301b2'
     p: string;      // 'eorc20'
     tick: Ticker;   // 'eoss'
 }
@@ -24,6 +24,7 @@ export interface DeployOpCode extends OpCode {
     op: "deploy";
     max: string;    // '210000000000'
     lim?: string;    // '10000'
+    prec?: number;    // 0
 }
 
 export function rlptxToTransaction(rlptx: Hex) {

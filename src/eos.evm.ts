@@ -1,4 +1,4 @@
-import { keccak256, Hex, parseTransaction, signatureToHex, serializeTransaction, recoverAddress, recoverPublicKey } from 'viem'
+import { keccak256, Hex, parseTransaction, signatureToHex, serializeTransaction, recoverAddress, recoverPublicKey, Address } from 'viem'
 import { LOCK_GENESIS_TIME } from './config.js';
 
 export function toTransactionId(rlptx: Hex): Hex {
@@ -23,7 +23,7 @@ export async function getFromAddress(rlptx: Hex) {
     const hash = keccak256(serializeTransaction({ ...tx }));
     const addres = await recoverAddress({hash, signature});
     if ( !addres ) return null;
-    return addres.toLowerCase();
+    return addres.toLowerCase() as Address;
 }
 
 // getFromAddress("0xf7824f468522ecb25c0082520894d10ca73e34fc6c7c530654cb9adb0810e7771320890579848dee9ab30000801b80885530ea015b900000").then(console.log);

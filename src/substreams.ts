@@ -34,12 +34,14 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
       // EORC-20 handling
       const tx = rlptxToTransaction(rlptx);
       if ( !tx ) continue;
-      if ( !tx.to ) continue;
+      const to = tx.to;
+      if ( !to ) continue;
       if ( !tx.data ) continue;
       const content = fromHex(tx.data, 'string');
       const opCode = parseOpCode(content);
       if ( !opCode ) continue;
       const from = await getFromAddress(rlptx);
+      if ( !from) continue;
       // const sha = contentUriToSha256(content);
       const value = tx.value?.toString();
       // const gas = tx.gas?.toString();
@@ -52,7 +54,7 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
         block: block_number,
         timestamp,
         from,
-        to: tx.to,
+        to,
         contentType,
         content,
         value,
@@ -65,7 +67,7 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
       } as InscriptionRawData) + "\n");
 
       // Update EORC-20 State
-      handleOpCode(opCode);
+      handleOpCode(transaction_hash, from, to, opCode, timestamp);
 
       // Update progress
       const now = Math.floor(Date.now().valueOf() / 1000);
