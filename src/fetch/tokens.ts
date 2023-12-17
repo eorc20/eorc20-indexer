@@ -30,7 +30,7 @@ export default async function tokens(req: Request): Promise<Response> {
     status: 200,
     data: {
         list,
-        count: 1,
+        count: list.length,
     }
   }
   return toJSON(response);
