@@ -2,10 +2,11 @@ import { emitter } from "./BlockEmitter.js";
 import { saveCursor } from "./utils.js";
 import { blockNumberFromGenesis, getFromAddress, toTransactionId } from "./eos.evm.js";
 import { parseOpCode, rlptxToTransaction, getMimeType } from "./eorc20.js";
-import { HTTP_ONLY, writers } from "./config.js";
+import { writers } from "./config.js";
 import logUpdate from "log-update";
 import { Hex, fromHex } from "viem";
 import { InscriptionRawData } from "./schemas.js";
+import { handleOpCode } from "./operations/index.js";
 
 let operations: string[] = [];
 
@@ -35,9 +36,9 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
       if ( !tx ) continue;
       if ( !tx.to ) continue;
       if ( !tx.data ) continue;
-      const data = parseOpCode(tx.data);
       const content = fromHex(tx.data, 'string');
-      if ( !data ) continue;
+      const opCode = parseOpCode(content);
+      if ( !opCode ) continue;
       const from = await getFromAddress(rlptx);
       // const sha = contentUriToSha256(content);
       const value = tx.value?.toString();
@@ -62,6 +63,9 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
         // sha,
         // miner,
       } as InscriptionRawData) + "\n");
+
+      // Update EORC-20 State
+      handleOpCode(opCode);
 
       // Update progress
       const now = Math.floor(Date.now().valueOf() / 1000);

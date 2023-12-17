@@ -39,9 +39,14 @@ export function rlptxToTransaction(rlptx: Hex) {
     return tx;
 }
 
-export function parseOpCode(data: Hex) {
-    const str = fromHex(data, 'string');
-    const opCode = str.split("data:,")[1];
+// const str = fromHex(data, 'string');
+
+export function parseOpCodeFromHex(data: Hex) {
+    return parseOpCode(fromHex(data, 'string'));
+}
+
+export function parseOpCode(content: string) {
+    const opCode = content.split(/data:[application\/json]?,/)[1];
     if ( !opCode ) return null;
     try {
         const parsedOp = JSON.parse(opCode);

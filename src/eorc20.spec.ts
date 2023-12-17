@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { contentUriToSha256, getMimeType, parseOpCode, rlptxToTransaction } from "./eorc20.js";
+import { contentUriToSha256, getMimeType, parseOpCode, parseOpCodeFromHex, rlptxToTransaction } from "./eorc20.js";
 
 describe("parseOpCode", () => {
     test("rlptxToTransaction", () => {
@@ -8,8 +8,16 @@ describe("parseOpCode", () => {
         if ( !tx.data ) return;
         expect(tx.data).toBeDefined();
     });
+    test("parseOpCodeFromHex", () => {
+        expect(parseOpCodeFromHex("0x646174613a2c7b2270223a22656f72633230222c226f70223a226d696e74222c227469636b223a22656f7373222c22616d74223a223130303030227d")).toEqual({
+            p: "eorc20",
+            tick: "eoss",
+            op: "mint",
+            amt: "10000",
+        });
+    });
     test("parseOpCode", () => {
-        expect(parseOpCode("0x646174613a2c7b2270223a22656f72633230222c226f70223a226d696e74222c227469636b223a22656f7373222c22616d74223a223130303030227d")).toEqual({
+        expect(parseOpCode("data:,{\"p\":\"eorc20\",\"op\":\"mint\",\"tick\":\"eoss\",\"amt\":\"10000\"}")).toEqual({
             p: "eorc20",
             tick: "eoss",
             op: "mint",
