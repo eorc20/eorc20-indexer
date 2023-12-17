@@ -1,5 +1,6 @@
 import { Clock } from "@substreams/core/proto";
 import fs from "fs";
+import { CURSOR_PATH } from "./config.js";
 
 export function clockToDay(clock: Clock) {
     if ( !clock.timestamp ) throw new Error("No timestamp in clock");
@@ -8,12 +9,12 @@ export function clockToDay(clock: Clock) {
 }
 
 export function readCursor() {
-    if ( fs.existsSync("data/cursor.lock") ) {
-        return fs.readFileSync("data/cursor.lock", "utf8");
+    if ( fs.existsSync(CURSOR_PATH) ) {
+        return fs.readFileSync(CURSOR_PATH, "utf8");
     }
     return undefined;
 }
 
 export function saveCursor(cursor: string) {
-    fs.writeFileSync("data/cursor.lock", cursor);
+    fs.writeFileSync(CURSOR_PATH, cursor);
 }

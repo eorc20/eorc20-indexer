@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 import "dotenv/config";
 
 // auth API token
@@ -24,15 +25,20 @@ export const LOCK_GENESIS_TIME = new Date("2023-04-05T02:18:09Z");
 // EORC
 export const TICKERS = (process.env.TICKERS ?? "eoss").split(",")
 
+export const FOLDER = process.env.FOLDER ?? "data"
+export const CURSOR_PATH = path.join(FOLDER, process.env.CURSOR_FILENAME ?? "cursor.lock");
+export const EORC20_PATH = path.join(FOLDER, process.env.EORC20_FILENAME ?? "eorc20.jsonl");
+export const BLOCKS_PATH = path.join(FOLDER, process.env.BLOCKS_FILENAME ?? "blocks.jsonl");
+
 // create data folder
-if ( !fs.existsSync("data")) {
-    fs.mkdirSync("data");
+if ( !fs.existsSync(FOLDER)) {
+    fs.mkdirSync(FOLDER);
 }
 
 // Stream Blocks
 export const writers = {
-    eorc: fs.createWriteStream("data/eorc20.jsonl", {flags: "a"}),
-    blocks: fs.createWriteStream("data/blocks.jsonl", {flags: "a"}),
+    eorc20: fs.createWriteStream(EORC20_PATH, {flags: "a"}),
+    blocks: fs.createWriteStream(BLOCKS_PATH, {flags: "a"}),
     // pushtx: fs.createWriteStream("data/pushtx.jsonl", {flags: "a"}),
 }
 

@@ -75,7 +75,7 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
 
   // Save operations buffer to disk
   console.log(`Writing ${operations.length} operations to disk`);
-  writers.eorc.write(operations.join(""));
+  writers.eorc20.write(operations.join(""));
   operations = []; // clear buffer
 
   // Save cursor
