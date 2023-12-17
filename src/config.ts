@@ -45,4 +45,5 @@ export const writers = {
 export const VERBOSE = true;
 export const PAUSED = process.env.PAUSED === "true";
 export const HTTP_ONLY = process.env.HTTP_ONLY === "true";
+export const IGNORE_SCAN = process.env.IGNORE_SCAN === "true";
 export const PORT = Number(process.env.PORT ?? "3000");

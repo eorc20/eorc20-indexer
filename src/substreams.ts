@@ -10,8 +10,8 @@ import { InscriptionRawData } from "./schemas.js";
 let operations: string[] = [];
 
 let total = 0;
-const start = Math.floor(Date.now().valueOf() / 1000);
-let last = start;
+const init_timestamp = Math.floor(Date.now().valueOf() / 1000);
+let last_timestamp = init_timestamp;
 
 emitter.on("anyMessage", async (message: any, cursor, clock) => {
   if ( !clock.timestamp ) return;
@@ -66,9 +66,9 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
       // Update progress
       const now = Math.floor(Date.now().valueOf() / 1000);
       total++;
-      const rate = total / (now - start);
-      if ( last !== now ) logUpdate(`Processed ${total} EORC-20 operations at ${rate.toFixed(2)} op/s (last block: ${block_number})`);
-      last = now
+      const rate = total / (now - init_timestamp);
+      if ( last_timestamp !== now ) logUpdate(`Processed ${total} EORC-20 operations at ${rate.toFixed(2)} op/s (last block: ${block_number})`);
+      last_timestamp = now
     }
   }
 
@@ -99,7 +99,7 @@ emitter.on("fatalError", (error) => {
   console.error(error);
 });
 
-if ( !HTTP_ONLY ) {
+export function start() {
   const cancelFn = emitter.start();
   console.log("EORC-20 indexer 🚀");
 
