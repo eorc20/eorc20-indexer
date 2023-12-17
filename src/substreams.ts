@@ -103,7 +103,7 @@ emitter.on("close", (error) => {
 // Fatal Error
 emitter.on("fatalError", (error) => {
   console.error(error);
-  process.exit(1);
+  process.exit(70);
 });
 
 export function start() {
@@ -111,9 +111,10 @@ export function start() {
   console.log("EORC-20 indexer 🚀");
 
   // Handle user exit
+  // https://github.com/dotnet/templating/wiki/Exit-Codes
   process.on("SIGINT", () => {
     console.log("Ctrl-C was pressed");
     cancelFn();
-    process.exit(1);
+    process.exit(130);
   });
 }

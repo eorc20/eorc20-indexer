@@ -20,7 +20,7 @@ if (!HTTP_ONLY ) {
 
 if ( PAUSED ) {
   console.log("Paused");
-  process.exit();
+  process.exit(0);
 }
 
 const app = Bun.serve({
