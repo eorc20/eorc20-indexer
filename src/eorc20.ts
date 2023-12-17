@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { Address, Hex, TransactionSerializableLegacy, fromHex, parseTransaction } from "viem";
 
 export type Ticker = string;
@@ -66,9 +67,10 @@ export function parseOpCode(data: Hex) {
 }
 
 export function contentUriToSha256(content_uri: string) {
-    const hasher = new Bun.CryptoHasher("sha256");
-    hasher.update(content_uri);
-    return hasher.digest("hex");
+    return createHash('sha256').update(content_uri, 'utf8').digest("hex")
+    // const hasher = new Bun.CryptoHasher("sha256");
+    // hasher.update(content_uri);
+    // return hasher.digest("hex");
 }
 
 export function isValidAmount(amt: string) {

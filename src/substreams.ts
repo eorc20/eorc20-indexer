@@ -5,6 +5,10 @@ import { contentUriToSha256, parseOpCode, rlptxToTransaction, getMimeType } from
 import { writers } from "./config.js";
 import logUpdate from "log-update";
 import { Hex } from "viem";
+import PQueue from "p-queue";
+
+const queue = new PQueue({ concurrency: 1 });
+let operations: string[] = [];
 
 let total = 0;
 const start = Math.floor(Date.now().valueOf() / 1000);
@@ -41,7 +45,8 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
       const gas = tx.gas?.toString();
       const gas_price = tx.gasPrice?.toString();
 
-      writers.eorc.write(JSON.stringify({
+      // Write to disk used for history
+      operations.push(JSON.stringify({
         transaction_hash,
         block_number,
         timestamp,
@@ -67,6 +72,11 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
       last = now
     }
   }
+
+  // Save operations buffer to disk
+  console.log(`Writing ${operations.length} operations to disk`);
+  writers.eorc.write(operations.join(""));
+  operations = []; // clear buffer
 
   // Save cursor
   saveCursor(cursor);
