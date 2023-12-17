@@ -2,7 +2,7 @@ import pkg from "../../package.json" assert { type: "json" };
 
 import { LicenseObject } from "openapi3-ts/oas30";
 import { OpenApiBuilder, ResponsesObject } from "openapi3-ts/oas31";
-import { TokensPayload } from "../schemas.js";
+import { TokensPayload, TokensResponse } from "../schemas.js";
 
 const TAGS = {
   USAGE: "Usage",
@@ -51,7 +51,7 @@ export async function openapi() {
           responses: {
             200: {
               description: "List of tokens",
-              content: { "application/json": { schema: { type: "string" } } },
+              content: { "application/json": { schema: TokensResponse } },
             },
           },
         },

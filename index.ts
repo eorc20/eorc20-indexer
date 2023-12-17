@@ -4,10 +4,10 @@ import { PAUSED, PORT } from "./src/config.js";
 // import DELETE from "./src/fetch/DELETE.js";
 import GET from "./src/fetch/GET.js";
 import OPTIONS from "./src/fetch/OPTIONS.js";
-// import POST from "./src/fetch/POST.js";
+import POST from "./src/fetch/POST.js";
 // import PUT from "./src/fetch/PUT.js";
 import { NotFound } from "./src/fetch/cors.js";
-import "./src/substreams.js";
+// import "./src/substreams.js";
 
 if ( PAUSED ) {
   console.log("Paused");
@@ -20,7 +20,7 @@ const app = Bun.serve({
   fetch(req: Request) {
     // return new Response("Hello World");
     if (req.method === "GET") return GET(req);
-    // if (req.method === "POST") return POST(req);
+    if (req.method === "POST") return POST(req);
     // if (req.method === "PUT") return PUT(req);
     if (req.method === "OPTIONS") return OPTIONS(req);
     // if (req.method === "DELETE") return DELETE(req);
@@ -28,4 +28,4 @@ const app = Bun.serve({
   },
 });
 
-// console.log(`Server listening on http://${app.hostname}:${app.port}`);
+console.log(`Server listening on http://${app.hostname}:${app.port}`);
