@@ -39,23 +39,23 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
       if ( !data ) continue;
       const from = await getFromAddress(rlptx);
       // const sha = contentUriToSha256(content);
-      // const value = tx.value?.toString();
+      const value = tx.value?.toString();
       // const gas = tx.gas?.toString();
       // const gasPrice = tx.gasPrice?.toString();
       const contentType = getMimeType(content).mimetype;
 
-      // Write to disk used for history
+      // Write EORC-20 operation to disk used for history
       operations.push(JSON.stringify({
         id: transaction_hash,
         block: block_number,
         timestamp,
         from,
         to: tx.to,
-        // value,
-        // nonce: tx.nonce,
-        // transaction_index,
         contentType,
         content,
+        value,
+        // nonce: tx.nonce,
+        // transaction_index,
         // gas,
         // gasPrice,
         // sha,
