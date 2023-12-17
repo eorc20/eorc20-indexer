@@ -6,7 +6,7 @@ import { writers } from "./config.js";
 import logUpdate from "log-update";
 import { Hex, fromHex } from "viem";
 import { InscriptionRawData } from "./schemas.js";
-import { handleOpCode } from "./operations/index.js";
+import { INSCRIPTION_NUMBER, handleOpCode } from "./operations/index.js";
 import pQueue from "p-queue";
 
 const queue = new pQueue({ concurrency: 1 });
@@ -83,7 +83,7 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
         const now = Math.floor(Date.now().valueOf() / 1000);
         total++;
         const rate = total / (now - init_timestamp);
-        if ( last_timestamp !== now ) logUpdate(`Queue ${queue.size} Processed ${total} EORC-20 operations at ${rate.toFixed(2)} op/s (last block: ${block_number})`);
+        if ( last_timestamp !== now ) logUpdate(`Queue ${queue.size} Processed ${total}/${INSCRIPTION_NUMBER} EORC-20 operations at ${rate.toFixed(2)} op/s (last block: ${block_number})`);
         last_timestamp = now
       }
 
