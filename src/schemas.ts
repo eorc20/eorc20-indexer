@@ -12,7 +12,7 @@ export type TokensPayload = Static<typeof TokensPayload>
 export const TokensListItem = Type.Object({
     amount: Type.String({example: "10000"}),
     tick: Type.String({example: "eoss"}),
-    number: Type.String({example: "22126343"}),
+    number: Type.Number({example: 22126343}),
     precision: Type.Number({example: 0}),
     createdAt: Type.Number({example: 1700888064}),
 })
@@ -40,11 +40,11 @@ export type InscriptionPayload = Static<typeof InscriptionPayload>
 
 export const InscriptionArrayItem = Type.Object({
     id: Type.String({example: "0x8c3adec69b79c036a21e7ccddf2ef387ef6ecde6a9bd7ef1b3d40c3fe1d399b1"}),
-    number: Type.String({example: "1032"}),
+    number: Type.Number({example: 1032}),
     owner: Type.String({example: "0x50e6585875ad67ffa6bd44381d7a572bdbdfa0ae"}),
     block: Type.Number({example: 21443083}),
-    timestamp: Type.String({example: 1702104171}),
-    protocol: Type.String({example: "asc-20"}),
+    timestamp: Type.Number({example: 1702104171}),
+    protocol: Type.String({example: "eorc-20"}),
     contentType: Type.String({example: "text/plain"}),
     content: Type.String({example: "data:,{\"p\":\"eorc20\",\"op\":\"mint\",\"tick\":\"eoss\",\"amt\":\"10000\"}"}),
 })

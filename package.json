@@ -36,6 +36,7 @@
     "log-update": "latest",
     "openapi3-ts": "latest",
     "p-queue": "latest",
+    "prom-client": "^15.1.0",
     "viem": "latest"
   },
   "devDependencies": {

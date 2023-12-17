@@ -2,7 +2,7 @@ import pkg from "../../package.json" assert { type: "json" };
 
 import { LicenseObject } from "openapi3-ts/oas30";
 import { OpenApiBuilder, ResponsesObject } from "openapi3-ts/oas31";
-import { InscriptionArrayItem, InscriptionPayload, TokensPayload, TokensResponse } from "../schemas.js";
+import { InscriptionArrayItem, InscriptionPayload, InscriptionResponse, TokensPayload, TokensResponse } from "../schemas.js";
 
 const TAGS = {
   USAGE: "Usage",
@@ -67,7 +67,7 @@ export async function openapi() {
         responses: {
           200: {
             description: "List of inscriptions",
-            content: { "application/json": { schema: InscriptionArrayItem } },
+            content: { "application/json": { schema: InscriptionResponse } },
           },
         },
       },

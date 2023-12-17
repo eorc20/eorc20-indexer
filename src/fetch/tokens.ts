@@ -4,7 +4,6 @@ import { toJSON } from "./cors.js";
 export default async function tokens(req: Request): Promise<Response> {
   const payload = await req.json() as TokensPayload;
   const { address, page, pageSize, tick } = payload;
-  console.log({ address, page, pageSize, tick });
   const response: TokensResponse = {
     status: 200,
     data: {
