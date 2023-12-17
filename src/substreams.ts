@@ -2,7 +2,7 @@ import { emitter } from "./BlockEmitter.js";
 import { saveCursor } from "./utils.js";
 import { blockNumberFromGenesis, getFromAddress, toTransactionId } from "./eos.evm.js";
 import { contentUriToSha256, parseOpCode, rlptxToTransaction, getMimeType } from "./eorc20.js";
-import { writers } from "./config.js";
+import { HTTP_ONLY, writers } from "./config.js";
 import logUpdate from "log-update";
 import { Hex, fromHex } from "viem";
 
@@ -98,12 +98,14 @@ emitter.on("fatalError", (error) => {
   console.error(error);
 });
 
-export const cancelFn = emitter.start();
-console.log("EORC-20 indexer 🚀");
+if ( !HTTP_ONLY ) {
+  const cancelFn = emitter.start();
+  console.log("EORC-20 indexer 🚀");
 
-// Handle user exit
-process.on("SIGINT", () => {
-  console.log("Ctrl-C was pressed");
-  cancelFn();
-  process.exit();
-});
+  // Handle user exit
+  process.on("SIGINT", () => {
+    console.log("Ctrl-C was pressed");
+    cancelFn();
+    process.exit();
+  });
+}
