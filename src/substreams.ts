@@ -103,6 +103,7 @@ emitter.on("close", (error) => {
 // Fatal Error
 emitter.on("fatalError", (error) => {
   console.error(error);
+  process.exit(1);
 });
 
 export function start() {
@@ -113,6 +114,6 @@ export function start() {
   process.on("SIGINT", () => {
     console.log("Ctrl-C was pressed");
     cancelFn();
-    process.exit();
+    process.exit(1);
   });
 }
