@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import readline from "node:readline";
+import { EORC20_PATH } from "./config.js";
 
 async function scan(filename: string) {
     return new Promise((resolve, reject) => {
@@ -7,7 +8,6 @@ async function scan(filename: string) {
             input: fs.createReadStream(filename),
             crlfDelay: Infinity
         });
-
         rl.on('line', (line) => {
             const row = JSON.parse(line);
             console.log(row);
@@ -23,4 +23,4 @@ async function scan(filename: string) {
     });
 }
 
-await scan("eorc.jsonl");
+await scan(EORC20_PATH);

@@ -7,7 +7,7 @@ import OPTIONS from "./src/fetch/OPTIONS.js";
 import POST from "./src/fetch/POST.js";
 // import PUT from "./src/fetch/PUT.js";
 import { NotFound } from "./src/fetch/cors.js";
-// import "./src/substreams.js";
+import "./src/substreams.js";
 
 if ( PAUSED ) {
   console.log("Paused");

@@ -4,10 +4,8 @@ import { blockNumberFromGenesis, getFromAddress, toTransactionId } from "./eos.e
 import { contentUriToSha256, parseOpCode, rlptxToTransaction, getMimeType } from "./eorc20.js";
 import { writers } from "./config.js";
 import logUpdate from "log-update";
-import { Hex } from "viem";
-import PQueue from "p-queue";
+import { Hex, fromHex } from "viem";
 
-const queue = new PQueue({ concurrency: 1 });
 let operations: string[] = [];
 
 let total = 0;
@@ -17,7 +15,7 @@ let last = start;
 emitter.on("anyMessage", async (message: any, cursor, clock) => {
   if ( !clock.timestamp ) return;
   const block_number = blockNumberFromGenesis(clock.timestamp?.toDate());
-  const timestamp = clock.timestamp?.toDate().toISOString();
+  const timestamp = Number(clock.timestamp.seconds);
 
   if (!message.transactionTraces) return;
   for ( const trace of message.transactionTraces ) {
@@ -26,42 +24,42 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
     for ( const action of trace.actionTraces) {
       if ( action.action.name !== "pushtx" ) continue;
       const jsonData = JSON.parse(action.action.jsonData);
-      const miner = jsonData.miner;
+      // const miner = jsonData.miner;
       const rlptx: Hex = `0x${jsonData.rlptx}`;
       const transaction_hash = toTransactionId(rlptx);
-      const transaction_index = trace.index;
+      // const transaction_index = Number(trace.index);
 
       // EORC-20 handling
       const tx = rlptxToTransaction(rlptx);
       if ( !tx ) continue;
       if ( !tx.to ) continue;
       if ( !tx.data ) continue;
-      const content_uri = tx.data;
-      const data = parseOpCode(content_uri);
+      const data = parseOpCode(tx.data);
+      const content = fromHex(tx.data, 'string');
       if ( !data ) continue;
       const from = await getFromAddress(rlptx);
-      const sha = contentUriToSha256(content_uri);
-      const value = tx.value?.toString();
-      const gas = tx.gas?.toString();
-      const gas_price = tx.gasPrice?.toString();
+      // const sha = contentUriToSha256(content);
+      // const value = tx.value?.toString();
+      // const gas = tx.gas?.toString();
+      // const gasPrice = tx.gasPrice?.toString();
+      const contentType = getMimeType(content).mimetype;
 
       // Write to disk used for history
       operations.push(JSON.stringify({
-        transaction_hash,
-        block_number,
+        id: transaction_hash,
+        block: block_number,
         timestamp,
-        to: tx.to,
         from,
-        data,
-        value,
-        nonce: tx.nonce,
-        ...getMimeType(content_uri),
-        transaction_index,
-        content_uri,
-        gas,
-        gas_price,
-        sha,
-        miner,
+        to: tx.to,
+        // value,
+        // nonce: tx.nonce,
+        // transaction_index,
+        contentType,
+        content,
+        // gas,
+        // gasPrice,
+        // sha,
+        // miner,
       }) + "\n");
 
       // Update progress
@@ -74,7 +72,7 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
   }
 
   // Save operations buffer to disk
-  console.log(`Writing ${operations.length} operations to disk`);
+  // console.log(`Writing ${operations.length} operations to disk`);
   writers.eorc20.write(operations.join(""));
   operations = []; // clear buffer
 
