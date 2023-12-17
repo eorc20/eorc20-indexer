@@ -23,9 +23,9 @@ describe("parseOpCode", () => {
             mimetype: "application/json",
         })
         expect(getMimeType(`data:,{"p":"erc-20","op":"mint","tick":"mars","id":"19300","amt":"1000"}`)).toEqual({
-            media_type: "plain",
-            mime_subtype: "text",
-            mimetype: "plain/text",
+            media_type: "text",
+            mime_subtype: "plain",
+            mimetype: "text/plain",
         })
     })
     test("contentUriToSha256", () => {

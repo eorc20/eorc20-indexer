@@ -68,9 +68,6 @@ export function parseOpCode(data: Hex) {
 
 export function contentUriToSha256(content_uri: string) {
     return createHash('sha256').update(content_uri, 'utf8').digest("hex")
-    // const hasher = new Bun.CryptoHasher("sha256");
-    // hasher.update(content_uri);
-    // return hasher.digest("hex");
 }
 
 export function isValidAmount(amt: string) {
@@ -86,9 +83,9 @@ export function isValidAmount(amt: string) {
 
 export function getMimeType(content_uri: string) {
     const [mineData] = content_uri.split(",");
-    const mimeType = mineData.split("data:")[1] || 'plain/text';
-    const media_type = mimeType?.split("/")[0] || 'plain';
-    const mime_subtype = mimeType?.split("/")[1] || 'text';
+    const mimeType = mineData.split("data:")[1] || 'text/plain';
+    const media_type = mimeType?.split("/")[0] || 'text';
+    const mime_subtype = mimeType?.split("/")[1] || 'plain';
     return {
         media_type: media_type,
         mime_subtype: mime_subtype,

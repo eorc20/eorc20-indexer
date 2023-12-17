@@ -28,3 +28,31 @@ export const TokensResponse = Type.Object({
 })
 
 export type TokensResponse = Static<typeof TokensResponse>
+
+export const InscriptionPayload = Type.Object({
+    owner: Type.Optional(Type.String({example: "0x0fb3e4662065c27bac8fbdfb8f1731c3293fdc09"})),
+    page: Type.Optional(Type.Number({example: 1})),
+    pageSize: Type.Optional(Type.Number({example: 12})),
+    tick: Type.Optional(Type.String({example: "eoss"})),
+})
+
+export type InscriptionPayload = Static<typeof InscriptionPayload>
+
+export const InscriptionArrayItem = Type.Object({
+    id: Type.String({example: "0x8c3adec69b79c036a21e7ccddf2ef387ef6ecde6a9bd7ef1b3d40c3fe1d399b1"}),
+    number: Type.String({example: "1032"}),
+    owner: Type.String({example: "0x50e6585875ad67ffa6bd44381d7a572bdbdfa0ae"}),
+    block: Type.Number({example: 21443083}),
+    timestamp: Type.String({example: 1702104171}),
+    protocol: Type.String({example: "asc-20"}),
+    contentType: Type.String({example: "text/plain"}),
+    content: Type.String({example: "data:,{\"p\":\"eorc20\",\"op\":\"mint\",\"tick\":\"eoss\",\"amt\":\"10000\"}"}),
+})
+
+export const InscriptionResponse = Type.Object({
+    status: Type.Number({example: 200}),
+    data: Type.Array(InscriptionArrayItem),
+})
+
+export type InscriptionResponse = Static<typeof InscriptionResponse>
+
