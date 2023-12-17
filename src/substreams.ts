@@ -1,10 +1,11 @@
 import { emitter } from "./BlockEmitter.js";
 import { saveCursor } from "./utils.js";
 import { blockNumberFromGenesis, getFromAddress, toTransactionId } from "./eos.evm.js";
-import { contentUriToSha256, parseOpCode, rlptxToTransaction, getMimeType } from "./eorc20.js";
+import { parseOpCode, rlptxToTransaction, getMimeType } from "./eorc20.js";
 import { HTTP_ONLY, writers } from "./config.js";
 import logUpdate from "log-update";
 import { Hex, fromHex } from "viem";
+import { InscriptionRawData } from "./schemas.js";
 
 let operations: string[] = [];
 
@@ -60,7 +61,7 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
         // gasPrice,
         // sha,
         // miner,
-      }) + "\n");
+      } as InscriptionRawData) + "\n");
 
       // Update progress
       const now = Math.floor(Date.now().valueOf() / 1000);
