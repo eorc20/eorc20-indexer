@@ -11,28 +11,44 @@ import { getMimeType } from "./mimetype.js";
 import pQueue from "p-queue";
 import { client } from "./clickhouse/createClient.js";
 
-const queue = new pQueue({ concurrency: 10 });
+const queue = new pQueue({ concurrency: 5 });
 
 // let operations: string[] = [];
 
+function time() {
+  return Math.floor(Date.now().valueOf() / 1000);
+}
+
 let inserts = 0;
 let blocks = 0;
-const init_timestamp = Math.floor(Date.now().valueOf() / 1000);
+const init_timestamp = time();
 // let last_timestamp = init_timestamp;
+let last_insert = 0;
 
 const transactions: TransactionRawData[] = [];
 const operations: Operation[] = [];
 
 async function insert() {
+  const now = time();
+  if ( now - last_insert < 1 ) return;
   if ( transactions.length < 1000 ) return;
-  // console.log(`Inserting ${transactions.length} transactions...`);
+  last_insert = now;
+  const insert_transactions: TransactionRawData[] = [];
+  const insert_operations: Operation[] = [];
+  let count = 0;
+  while ( true ) {
+    insert_transactions.push(transactions.pop() as TransactionRawData)
+    insert_operations.push(operations.pop() as Operation)
+    count++
+    if ( count > 1000 ) break;
+  }
+
+  transactions.pop()
+  await client.insert({table: "transactions", values: insert_transactions, format: "JSONEachRow"})
+  await client.insert({table: "operations", values: insert_operations, format: "JSONEachRow"})
   // console.log(response);
-  // console.log(`Inserting ${transactions.length}/${inserts} transactions...`);
-  await client.insert({table: "transactions", values: transactions, format: "JSONEachRow"})
-  await client.insert({table: "operations", values: operations, format: "JSONEachRow"})
-  // console.log(response);
-  transactions.length = 0;
-  operations.length = 0;
+  // transactions.length = 0;
+  // operations.length = 0;
 }
 
 emitter.on("anyMessage", async (message: any, cursor, clock) => {
@@ -131,9 +147,9 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
   });
 
   // logging
-  const now = Math.floor(Date.now().valueOf() / 1000);
+  const now = time();
   const rate = inserts / (now - init_timestamp);
-  logUpdate(`queue/inserts/blocks ${queue.size}/${inserts}/${blocks} at ${rate.toFixed(2)} op/s (${block_number} last block)`);
+  logUpdate(`queue/inserts/blocks ${queue.size}(${transactions.length})/${inserts}/${blocks} at ${rate.toFixed(2)} op/s (${block_number} last block)`);
 });
 
 // End of Stream
