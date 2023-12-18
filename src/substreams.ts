@@ -2,14 +2,12 @@ import { emitter } from "./BlockEmitter.js";
 import { saveCursor } from "./utils.js";
 import { blockNumberFromGenesis, getFromAddress, toTransactionId } from "./eos.evm.js";
 import { parseOpCode, rlptxToTransaction, contentUriToSha256, MintOpCode, AnyOpCode } from "./eorc20.js";
-import { writer } from "./config.js";
+import { writers } from "./config.js";
 import logUpdate from "log-update";
 import { Hex, fromHex } from "viem";
-import { NativeBlock, Operation, TransactionRawData } from "./schemas.js";
-import { INSCRIPTION_NUMBER, handleOpCode } from "./operations/index.js";
+import { Operation, TransactionRawData } from "./schemas.js";
 import { getMimeType } from "./mimetype.js";
 import pQueue from "p-queue";
-import { client } from "./clickhouse/createClient.js";
 
 const queue = new pQueue({ concurrency: 1 });
 
@@ -29,25 +27,25 @@ const max_inserts = 1000;
 const transactions: TransactionRawData[] = [];
 const operations: Operation[] = [];
 
-async function insert() {
-  if ( transactions.length < 1000 ) return;
-  const insert_transactions: TransactionRawData[] = [];
-  const insert_operations: Operation[] = [];
-  let count = 0;
-  while ( true ) {
-    insert_transactions.push(transactions.pop() as TransactionRawData)
-    insert_operations.push(operations.pop() as Operation)
-    count++
-    if ( count > 1000 ) break;
-  }
+// async function insert() {
+//   if ( transactions.length < 1000 ) return;
+//   const insert_transactions: TransactionRawData[] = [];
+//   const insert_operations: Operation[] = [];
+//   let count = 0;
+//   while ( true ) {
+//     insert_transactions.push(transactions.pop() as TransactionRawData)
+//     insert_operations.push(operations.pop() as Operation)
+//     count++
+//     if ( count > 1000 ) break;
+//   }
 
-  transactions.pop()
-  await client.insert({table: "transactions", values: insert_transactions, format: "JSONEachRow"})
-  await client.insert({table: "operations", values: insert_operations, format: "JSONEachRow"})
-  // console.log(response);
-  // transactions.length = 0;
-  // operations.length = 0;
-}
+//   transactions.pop()
+//   await client.insert({table: "transactions", values: insert_transactions, format: "JSONEachRow"})
+//   await client.insert({table: "operations", values: insert_operations, format: "JSONEachRow"})
+//   // console.log(response);
+//   // transactions.length = 0;
+//   // operations.length = 0;
+// }
 
 emitter.on("anyMessage", async (message: any, cursor, clock) => {
   // if ( queue.size > 100 ) {
@@ -62,7 +60,7 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
   const block_number = blockNumberFromGenesis(clock.timestamp?.toDate());
   const timestamp = Number(clock.timestamp.seconds);
   const disk_transactions: TransactionRawData[] = [];
-  // const operations: any[] = [];
+  const disk_operations: Operation[] = [];
 
   if (!message.transactionTraces) return;
   for ( const trace of message.transactionTraces ) {
@@ -118,10 +116,11 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
 
       // For on-disk history
       disk_transactions.push(transaction);
+      disk_operations.push({...opCode, id: transaction_hash});
 
       // for Clickhouse history
-      transactions.push(transaction);
-      operations.push({...opCode, id: transaction_hash});
+      // transactions.push(transaction);
+      // operations.push({...opCode, id: transaction_hash});
       inserts++;
     }
   }
@@ -129,7 +128,8 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
   // Save operations buffer to disk
   if ( disk_transactions.length) {
     // console.log(`Writing ${transactions.length} transactions to disk`);
-    writer.write(disk_transactions.map(item => JSON.stringify(item) + "\n").join(""));
+    writers.transactions.write(disk_transactions.map(item => JSON.stringify(item) + "\n").join(""));
+    writers.operations.write(disk_operations.map(item => JSON.stringify(item) + "\n").join(""));
   }
   // operations.length = 0;
   disk_transactions.length = 0;

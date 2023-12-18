@@ -34,6 +34,7 @@ export const TICKERS = (process.env.TICKERS ?? "eoss").split(",")
 export const FOLDER = process.env.FOLDER ?? "data"
 export const CURSOR_PATH = path.join(FOLDER, process.env.CURSOR_FILENAME ?? "cursor.lock");
 export const TRANSACTIONS_PATH = path.join(FOLDER, process.env.TRANSACTIONS_FILENAME ?? "transactions.jsonl");
+export const OPERATIONS_PATH = path.join(FOLDER, process.env.OPERATIONS_FILENAME ?? "operations.jsonl");
 
 // create data folder
 if ( !fs.existsSync(FOLDER)) {
@@ -41,7 +42,10 @@ if ( !fs.existsSync(FOLDER)) {
 }
 
 // Stream Blocks
-export const writer = fs.createWriteStream(TRANSACTIONS_PATH, {flags: "a"})
+export const writers = {
+    transactions: fs.createWriteStream(TRANSACTIONS_PATH, {flags: "a"}),
+    operations: fs.createWriteStream(OPERATIONS_PATH, {flags: "a"}),
+}
 
 export const VERBOSE = true;
 export const PAUSED = process.env.PAUSED === "true";
