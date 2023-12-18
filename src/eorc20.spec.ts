@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { contentUriToSha256, getMimeType, parseOpCode, parseOpCodeFromHex, rlptxToTransaction } from "./eorc20.js";
+import { contentUriToSha256, parseOpCode, parseOpCodeFromHex, rlptxToTransaction } from "./eorc20.js";
 
 describe("parseOpCode", () => {
     test("rlptxToTransaction", () => {
@@ -24,18 +24,6 @@ describe("parseOpCode", () => {
             amt: "10000",
         });
     });
-    test("getMimeType", () => {
-        expect(getMimeType(`data:application/json,{"p":"ierc-20","op":"mint","tick":"pows","amt":"1000","nonce":"523240143910290187"}`)).toEqual({
-            media_type: "application",
-            mime_subtype: "json",
-            mimetype: "application/json",
-        })
-        expect(getMimeType(`data:,{"p":"erc-20","op":"mint","tick":"mars","id":"19300","amt":"1000"}`)).toEqual({
-            media_type: "text",
-            mime_subtype: "plain",
-            mimetype: "text/plain",
-        })
-    })
     test("contentUriToSha256", () => {
         expect(contentUriToSha256(`data:application/json,{"p":"ierc-20","op":"mint","tick":"pows","amt":"1000","nonce":"523240143910290187"}`))
             .toBe("8c0989d456bf0af6b5b11a42d387fba4e2a7f80e9976522b49d3e17c8a03add2");

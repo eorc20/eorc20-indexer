@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import { IGNORE_SCAN, PAUSED } from "../src/config.js";
+import { PAUSED } from "../src/config.js";
 import { emitter } from "../src/BlockEmitter.js";
-import { scan } from "../src/scan.js"
+// import { scan } from "../src/scan.js"
 import "../src/substreams.js"
 
 if ( PAUSED ) {
@@ -10,10 +10,10 @@ if ( PAUSED ) {
     process.exit(0);
 }
 
-// Scan existing inscriptions and index them before starting the server
-if ( !IGNORE_SCAN ) {
-  await scan();
-}
+// // Scan existing inscriptions and index them before starting the server
+// if ( !IGNORE_SCAN ) {
+//   await scan();
+// }
 
 // Start indexing with substreams
 emitter.start();

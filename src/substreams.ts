@@ -1,13 +1,15 @@
 import { emitter } from "./BlockEmitter.js";
 import { saveCursor } from "./utils.js";
 import { blockNumberFromGenesis, getFromAddress, toTransactionId } from "./eos.evm.js";
-import { parseOpCode, rlptxToTransaction, getMimeType } from "./eorc20.js";
-import { writers } from "./config.js";
+import { parseOpCode, rlptxToTransaction, contentUriToSha256, MintOpCode, AnyOpCode } from "./eorc20.js";
+import { writer } from "./config.js";
 import logUpdate from "log-update";
 import { Hex, fromHex } from "viem";
-import { InscriptionRawData } from "./schemas.js";
+import { NativeBlock, TransactionRawData } from "./schemas.js";
 import { INSCRIPTION_NUMBER, handleOpCode } from "./operations/index.js";
+import { getMimeType } from "./mimetype.js";
 import pQueue from "p-queue";
+import { client } from "./clickhouse/createClient.js";
 
 const queue = new pQueue({ concurrency: 1 });
 
@@ -26,8 +28,12 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
   // }
   queue.add(async () => {
     if ( !clock.timestamp ) return;
+    const native_block_id = clock.id;
+    const native_block_number = Number(clock.number);
     const block_number = blockNumberFromGenesis(clock.timestamp?.toDate());
     const timestamp = Number(clock.timestamp.seconds);
+    const transactions: TransactionRawData[] = [];
+    // const operations: any[] = [];
 
     if (!message.transactionTraces) return;
     for ( const trace of message.transactionTraces ) {
@@ -36,10 +42,10 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
       for ( const action of trace.actionTraces) {
         if ( action.action.name !== "pushtx" ) continue;
         const jsonData = JSON.parse(action.action.jsonData);
-        // const miner = jsonData.miner;
+        const miner = jsonData.miner;
         const rlptx: Hex = `0x${jsonData.rlptx}`;
-        const transaction_hash = toTransactionId(rlptx);
-        // const transaction_index = Number(trace.index);
+        const transaction_hash = toTransactionId(rlptx) as Hex;
+        const transaction_index = Number(trace.index);
 
         // EORC-20 handling
         const tx = rlptxToTransaction(rlptx);
@@ -47,37 +53,44 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
         const to = tx.to;
         if ( !to ) continue;
         if ( !tx.data ) continue;
-        const content = fromHex(tx.data, 'string');
-        const opCode = parseOpCode(content);
+        const content_uri = fromHex(tx.data, 'string');
+        const opCode = parseOpCode(content_uri);
         if ( !opCode ) continue;
         const from = await getFromAddress(rlptx);
         if ( !from ) continue;
-        // const sha = contentUriToSha256(content);
+        const sha = contentUriToSha256(content_uri);
         const value = tx.value?.toString();
-        // const gas = tx.gas?.toString();
-        // const gasPrice = tx.gasPrice?.toString();
-        const contentType = getMimeType(content).mimetype;
+        const gas = tx.gas?.toString();
+        const gas_price = tx.gasPrice?.toString();
+        // const contentType = getMimeType(content_uri).mimetype;
 
         // Write EORC-20 operation to disk used for history
-        operations.push(JSON.stringify({
-          id: transaction_hash,
-          block: block_number,
+        transactions.push({
+          transaction_hash,
+          block_number,
           timestamp,
-          from,
-          to,
-          contentType,
-          content,
+          creator: from,
+          from_address: from,
+          to_address: to,
+          ...getMimeType(content_uri),
+          content_uri,
           value,
-          // nonce: tx.nonce,
-          // transaction_index,
-          // gas,
-          // gasPrice,
-          // sha,
-          // miner,
-        } as InscriptionRawData) + "\n");
 
-        // Update EORC-20 State
-        handleOpCode(transaction_hash, from, to, opCode, timestamp);
+          // extras
+          native_block_number,
+          native_block_id,
+          nonce: tx.nonce,
+          transaction_index,
+          gas,
+          gas_price,
+          sha,
+          miner,
+        });
+
+        // operations.push({id: transaction_hash, ...opCode});
+
+        // // Update EORC-20 State
+        // handleOpCode(transaction_hash, from, to, opCode, timestamp);
 
         // Update progress
         const now = Math.floor(Date.now().valueOf() / 1000);
@@ -87,10 +100,17 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
         last_timestamp = now
       }
 
+      // // Save to Clickhouse
+      // await client.insert({table: "transactions", values: transactions, format: "JSONEachRow"})
+      // await client.insert({table: "native_blocks", values: native_blocks, format: "JSONEachRow"})
+      // await client.insert({table: "operations", values: operations, format: "JSONEachRow"})
+
       // Save operations buffer to disk
-      // console.log(`Writing ${operations.length} operations to disk`);
-      writers.eorc20.write(operations.join(""));
-      operations = []; // clear buffer
+      if ( transactions.length) {
+        console.log(`Writing ${transactions.length} transactions to disk`);
+        writer.write(transactions.map(item => JSON.stringify(item) + "\n").join(""));
+      }
+      // operations = []; // clear buffer
 
       // Save cursor
       saveCursor(cursor);

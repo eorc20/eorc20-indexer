@@ -2,6 +2,12 @@ import fs from "fs";
 import path from "path";
 import "dotenv/config";
 
+// Defaults
+export const DEFAULT_HOST = "http://localhost:8123";
+export const DEFAULT_DATABASE = "default";
+export const DEFAULT_USERNAME = "default";
+export const DEFAULT_PASSWORD = "";
+
 // auth API token
 // https://app.streamingfast.io/
 // https://app.pinax.network/
@@ -27,8 +33,7 @@ export const TICKERS = (process.env.TICKERS ?? "eoss").split(",")
 
 export const FOLDER = process.env.FOLDER ?? "data"
 export const CURSOR_PATH = path.join(FOLDER, process.env.CURSOR_FILENAME ?? "cursor.lock");
-export const EORC20_PATH = path.join(FOLDER, process.env.EORC20_FILENAME ?? "eorc20.jsonl");
-export const BLOCKS_PATH = path.join(FOLDER, process.env.BLOCKS_FILENAME ?? "blocks.jsonl");
+export const TRANSACTIONS_PATH = path.join(FOLDER, process.env.TRANSACTIONS_FILENAME ?? "transactions.jsonl");
 
 // create data folder
 if ( !fs.existsSync(FOLDER)) {
@@ -36,11 +41,13 @@ if ( !fs.existsSync(FOLDER)) {
 }
 
 // Stream Blocks
-export const writers = {
-    eorc20: fs.createWriteStream(EORC20_PATH, {flags: "a"}),
-    blocks: fs.createWriteStream(BLOCKS_PATH, {flags: "a"}),
-}
+export const writer = fs.createWriteStream(TRANSACTIONS_PATH, {flags: "a"})
 
 export const VERBOSE = true;
 export const PAUSED = process.env.PAUSED === "true";
 export const IGNORE_SCAN = process.env.IGNORE_SCAN === "true";
+
+// ClickHouse
+export const HOST = process.env.HOST ?? DEFAULT_HOST;
+export const PASSWORD = process.env.PASSWORD ?? DEFAULT_PASSWORD;
+export const DATABASE = process.env.DATABASE ?? DEFAULT_DATABASE;

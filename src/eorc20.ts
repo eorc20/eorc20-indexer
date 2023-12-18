@@ -4,8 +4,6 @@ import { Address, Hex, TransactionSerializableLegacy, fromHex, parseTransaction 
 export type Ticker = string;
 
 export interface OpCode {
-    // from: Address;  // '0x4ce47b001f40438c4ccd5188a7f688023be301b2'
-    // to: Address;    // '0x4ce47b001f40438c4ccd5188a7f688023be301b2'
     p: string;      // 'eorc20'
     tick: Ticker;   // 'eoss'
 }
@@ -27,6 +25,8 @@ export interface DeployOpCode extends OpCode {
     prec?: number;    // 0
 }
 
+export type AnyOpCode = MintOpCode | TransferOpCode | DeployOpCode;
+
 export function rlptxToTransaction(rlptx: Hex) {
     let tx: TransactionSerializableLegacy
     try {
@@ -46,7 +46,7 @@ export function parseOpCodeFromHex(data: Hex) {
     return parseOpCode(fromHex(data, 'string'));
 }
 
-export function parseOpCode(content: string) {
+export function parseOpCode(content: string): TransferOpCode | MintOpCode | DeployOpCode | null {
     const opCode = content.split(/data:[application\/json]?,/)[1];
     if ( !opCode ) return null;
     try {
@@ -85,16 +85,4 @@ export function isValidAmount(amt: string) {
         return false;
     }
     return true;
-}
-
-export function getMimeType(content_uri: string) {
-    const [mineData] = content_uri.split(",");
-    const mimeType = mineData.split("data:")[1] || 'text/plain';
-    const media_type = mimeType?.split("/")[0] || 'text';
-    const mime_subtype = mimeType?.split("/")[1] || 'plain';
-    return {
-        media_type: media_type,
-        mime_subtype: mime_subtype,
-        mimetype: mimeType,
-    }
 }

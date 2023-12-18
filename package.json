@@ -22,12 +22,14 @@
   },
   "scripts": {
     "start": "tsc && node ./dist/bin/cli.js",
+    "scan": "tsc && node ./dist/src/scan.js",
     "test": "bun test",
     "posttest": "tsc --noEmit",
     "prepublishOnly": "tsc"
   },
   "dependencies": {
-    "@sinclair/typebox": "^0.31.28",
+    "@clickhouse/client": "latest",
+    "@sinclair/typebox": "latest",
     "@substreams/core": "^0.8.0",
     "@substreams/manifest": "^0.7.0",
     "@substreams/node": "^0.5.2",
