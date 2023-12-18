@@ -24,15 +24,13 @@ let blocks = 0;
 const init_timestamp = time();
 // let last_timestamp = init_timestamp;
 let last_insert = 0;
+const max_inserts = 1000;
 
 const transactions: TransactionRawData[] = [];
 const operations: Operation[] = [];
 
 async function insert() {
-  const now = time();
-  if ( now - last_insert < 1 ) return;
   if ( transactions.length < 1000 ) return;
-  last_insert = now;
   const insert_transactions: TransactionRawData[] = [];
   const insert_operations: Operation[] = [];
   let count = 0;

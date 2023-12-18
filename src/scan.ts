@@ -4,9 +4,10 @@ import { TRANSACTIONS_PATH } from "./config.js";
 import { client } from "./clickhouse/createClient.js";
 import pQueue from "p-queue";
 import { parseOpCode } from "./eorc20.js";
+import { Operation, TransactionRawData } from "./schemas.js";
 
 const max_inserts = 1000;
-const queue = new pQueue({concurrency: 1});
+const queue = new pQueue({concurrency: 10});
 const transactions: any[] = [];
 const operations: any[] = [];
 
@@ -16,11 +17,22 @@ let lines = 0;
 
 async function insert() {
     if ( transactions.length === 0 ) return;
-    console.log(`Inserting ${transactions.length}/${inserts} transactions...`);
-    await client.insert({table: "transactions", values: transactions, format: "JSONEachRow"})
-    await client.insert({table: "operations", values: operations, format: "JSONEachRow"})
-    transactions.length = 0;
-    operations.length = 0;
+    const insert_transactions: TransactionRawData[] = [];
+    const insert_operations: Operation[] = [];
+
+    let count = 0;
+    while ( true ) {
+        const insert_transaction = transactions.pop();
+        const insert_operation = operations.pop();
+        if ( !insert_transaction || !insert_operation ) break;
+        insert_transactions.push(insert_transaction)
+        insert_operations.push(insert_operation)
+        count++
+        if ( count > 1000 ) break;
+    }
+    console.log(`Inserting ${insert_transactions.length}/${inserts} transactions...`);
+    await client.insert({table: "transactions", values: insert_transactions, format: "JSONEachRow"})
+    await client.insert({table: "operations", values: insert_operations, format: "JSONEachRow"})
 }
 
 export function scan() {
