@@ -176,10 +176,11 @@ ENGINE = MergeTree()
 ORDER BY (block_number)
 POPULATE
 AS SELECT
-  native_block_id as block_id,
-  native_block_number as block_number,
-  timestamp
+  last_value(native_block_id) as block_id,
+  last_value(native_block_number) as block_number,
+  last_value(timestamp)
 FROM transactions
+GROUP BY native_block_id
 ORDER BY block_number DESC;
 
 -- group token holders by ticker --

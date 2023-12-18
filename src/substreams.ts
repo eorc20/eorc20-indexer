@@ -11,7 +11,7 @@ import { getMimeType } from "./mimetype.js";
 import pQueue from "p-queue";
 import { client } from "./clickhouse/createClient.js";
 
-const queue = new pQueue({ concurrency: 5 });
+const queue = new pQueue({ concurrency: 1 });
 
 // let operations: string[] = [];
 
@@ -141,10 +141,10 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
   saveCursor(cursor);
   blocks++;
 
-  // Queue Clickhouse inserts
-  queue.add(async () => {
-    await insert();
-  });
+  // // Queue Clickhouse inserts
+  // queue.add(async () => {
+  //   await insert();
+  // });
 
   // logging
   const now = time();
