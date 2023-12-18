@@ -15,7 +15,8 @@ const queue = new pQueue({ concurrency: 1 });
 
 let operations: string[] = [];
 
-let total = 0;
+let inserts = 0;
+let blocks = 0;
 const init_timestamp = Math.floor(Date.now().valueOf() / 1000);
 let last_timestamp = init_timestamp;
 
@@ -33,7 +34,7 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
     const block_number = blockNumberFromGenesis(clock.timestamp?.toDate());
     const timestamp = Number(clock.timestamp.seconds);
     const transactions: TransactionRawData[] = [];
-    // const operations: any[] = [];
+    const operations: any[] = [];
 
     if (!message.transactionTraces) return;
     for ( const trace of message.transactionTraces ) {
@@ -93,27 +94,9 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
         // handleOpCode(transaction_hash, from, to, opCode, timestamp);
 
         // Update progress
-        const now = Math.floor(Date.now().valueOf() / 1000);
-        total++;
-        const rate = total / (now - init_timestamp);
-        if ( last_timestamp !== now ) logUpdate(`Queue ${queue.size} Processed ${total}/${INSCRIPTION_NUMBER} EORC-20 operations at ${rate.toFixed(2)} op/s (last block: ${block_number})`);
-        last_timestamp = now
+        inserts++;
       }
 
-      // // Save to Clickhouse
-      // await client.insert({table: "transactions", values: transactions, format: "JSONEachRow"})
-      // await client.insert({table: "native_blocks", values: native_blocks, format: "JSONEachRow"})
-      // await client.insert({table: "operations", values: operations, format: "JSONEachRow"})
-
-      // Save operations buffer to disk
-      if ( transactions.length) {
-        // console.log(`Writing ${transactions.length} transactions to disk`);
-        writer.write(transactions.map(item => JSON.stringify(item) + "\n").join(""));
-      }
-      // operations = []; // clear buffer
-
-      // Save cursor
-      saveCursor(cursor);
       // writers.blocks.write(JSON.stringify({
       //   timestamp,
       //   block_number,
@@ -121,6 +104,25 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
       //   eos_block_id: clock.id
       // }) + "\n");
     }
+
+    // // // Save to Clickhouse
+    // await client.insert({table: "transactions", values: transactions, format: "JSONEachRow"})
+    // // await client.insert({table: "native_blocks", values: native_blocks, format: "JSONEachRow"})
+    // await client.insert({table: "operations", values: operations, format: "JSONEachRow"})
+
+    // Save operations buffer to disk
+    if ( transactions.length) {
+      // console.log(`Writing ${transactions.length} transactions to disk`);
+      writer.write(transactions.map(item => JSON.stringify(item) + "\n").join(""));
+    }
+    // operations = []; // clear buffer
+
+    // Save cursor
+    saveCursor(cursor);
+    blocks++;
+    const now = Math.floor(Date.now().valueOf() / 1000);
+    const rate = inserts / (now - init_timestamp);
+    logUpdate(`${queue.size}/${inserts}/${blocks} EORC-20 ops at ${rate.toFixed(2)} op/s (${block_number} block)`);
   })
 });
 
