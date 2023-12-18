@@ -1,4 +1,7 @@
-FROM oven/bun
+FROM node:alpine
+
+COPY package*.json ./
+RUN npm ci
 COPY . .
-RUN bun install
-ENTRYPOINT [ "bun", "./index.ts" ]
+
+ENTRYPOINT ["npm", "start"]

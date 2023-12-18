@@ -39,11 +39,8 @@ if ( !fs.existsSync(FOLDER)) {
 export const writers = {
     eorc20: fs.createWriteStream(EORC20_PATH, {flags: "a"}),
     blocks: fs.createWriteStream(BLOCKS_PATH, {flags: "a"}),
-    // pushtx: fs.createWriteStream("data/pushtx.jsonl", {flags: "a"}),
 }
 
 export const VERBOSE = true;
 export const PAUSED = process.env.PAUSED === "true";
-export const HTTP_ONLY = process.env.HTTP_ONLY === "true";
 export const IGNORE_SCAN = process.env.IGNORE_SCAN === "true";
-export const PORT = Number(process.env.PORT ?? "3000");

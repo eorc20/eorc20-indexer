@@ -51,7 +51,7 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
         const opCode = parseOpCode(content);
         if ( !opCode ) continue;
         const from = await getFromAddress(rlptx);
-        if ( !from) continue;
+        if ( !from ) continue;
         // const sha = contentUriToSha256(content);
         const value = tx.value?.toString();
         // const gas = tx.gas?.toString();
@@ -87,31 +87,22 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
         last_timestamp = now
       }
 
-        // Save operations buffer to disk
-        // console.log(`Writing ${operations.length} operations to disk`);
-        writers.eorc20.write(operations.join(""));
-        operations = []; // clear buffer
+      // Save operations buffer to disk
+      // console.log(`Writing ${operations.length} operations to disk`);
+      writers.eorc20.write(operations.join(""));
+      operations = []; // clear buffer
 
-        // Save cursor
-        saveCursor(cursor);
-        // writers.blocks.write(JSON.stringify({
-        //   timestamp,
-        //   block_number,
-        //   eos_block_number: Number(clock.number),
-        //   eos_block_id: clock.id
-        // }) + "\n");
+      // Save cursor
+      saveCursor(cursor);
+      // writers.blocks.write(JSON.stringify({
+      //   timestamp,
+      //   block_number,
+      //   eos_block_number: Number(clock.number),
+      //   eos_block_id: clock.id
+      // }) + "\n");
     }
   })
 });
-
-// // restart processing when queue is idle
-// queue.on("completed", () => {
-//   console.log("Queue is completed")
-//   if ( !emitter.cancelFn ) {
-//     console.log("Restarting emitter")
-//     emitter.start();
-//   }
-// });
 
 // End of Stream
 emitter.on("close", (error) => {
@@ -122,10 +113,10 @@ emitter.on("close", (error) => {
 
 // Fatal Error
 emitter.on("fatalError", (error) => {
+  console.error("☠️ fatalError occurred");
   console.error(error);
   process.exit(70);
 });
-
 
 // Handle user exit
 // https://github.com/dotnet/templating/wiki/Exit-Codes
