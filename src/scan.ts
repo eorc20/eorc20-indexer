@@ -9,7 +9,6 @@ const queue = new pQueue({concurrency: 1});
 const transactions: TransactionRawData[][] = [];
 const buffer: TransactionRawData[] = [];
 
-
 console.log("Scanning inscriptions...");
 const rl = readline.createInterface({
     input: fs.createReadStream("./data/transactions.jsonl"),

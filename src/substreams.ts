@@ -1,17 +1,20 @@
 import { emitter } from "./BlockEmitter.js";
 import { saveCursor } from "./utils.js";
 import { blockNumberFromGenesis, getFromAddress, toTransactionId } from "./eos.evm.js";
-import { parseOpCode, rlptxToTransaction, contentUriToSha256, MintOpCode, AnyOpCode } from "./eorc20.js";
+import { parseOpCode, rlptxToTransaction, contentUriToSha256 } from "./eorc20.js";
 import { writers } from "./config.js";
 import logUpdate from "log-update";
 import { Hex, fromHex } from "viem";
-import { Operation, TransactionRawData } from "./schemas.js";
+import { TransactionRawData } from "./schemas.js";
 import { getMimeType } from "./mimetype.js";
 import pQueue from "p-queue";
+import { client } from "./clickhouse/createClient.js";
+
+function timeout(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 const queue = new pQueue({ concurrency: 1 });
-
-// let operations: string[] = [];
 
 function time() {
   return Math.floor(Date.now().valueOf() / 1000);
@@ -19,48 +22,26 @@ function time() {
 
 let inserts = 0;
 let blocks = 0;
+let clickhouse_inserts = 0;
 const init_timestamp = time();
-// let last_timestamp = init_timestamp;
-let last_insert = 0;
-const max_inserts = 1000;
 
-const transactions: TransactionRawData[] = [];
-const operations: Operation[] = [];
-
-// async function insert() {
-//   if ( transactions.length < 1000 ) return;
-//   const insert_transactions: TransactionRawData[] = [];
-//   const insert_operations: Operation[] = [];
-//   let count = 0;
-//   while ( true ) {
-//     insert_transactions.push(transactions.pop() as TransactionRawData)
-//     insert_operations.push(operations.pop() as Operation)
-//     count++
-//     if ( count > 1000 ) break;
-//   }
-
-//   transactions.pop()
-//   await client.insert({table: "transactions", values: insert_transactions, format: "JSONEachRow"})
-//   await client.insert({table: "operations", values: insert_operations, format: "JSONEachRow"})
-//   // console.log(response);
-//   // transactions.length = 0;
-//   // operations.length = 0;
-// }
+function insert(buffer: TransactionRawData[]) {
+  queue.add(async () => {
+    const response = await client.insert({table: "transactions", values: buffer, format: "JSONEachRow"})
+    clickhouse_inserts+=buffer.length;
+    buffer.length = 0;
+    // console.log(`clickhouse insert: ${buffer.length} [${response.query_id}]`);
+    await timeout(250);
+  });
+}
 
 emitter.on("anyMessage", async (message: any, cursor, clock) => {
-  // if ( queue.size > 100 ) {
-  //   if ( emitter.cancelFn ) {
-  //     console.log("Queue is full, pausing emitter");
-  //     emitter.cancelFn();
-  //   }
-  // }
   if ( !clock.timestamp ) return;
   const native_block_id = clock.id;
   const native_block_number = Number(clock.number);
   const block_number = blockNumberFromGenesis(clock.timestamp?.toDate());
   const timestamp = Number(clock.timestamp.seconds);
-  const disk_transactions: TransactionRawData[] = [];
-  // const disk_operations: Operation[] = [];
+  const transactions: TransactionRawData[] = [];
 
   if (!message.transactionTraces) return;
   for ( const trace of message.transactionTraces ) {
@@ -89,7 +70,6 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
       const value = tx.value?.toString();
       const gas = tx.gas?.toString();
       const gas_price = tx.gasPrice?.toString();
-      // const contentType = getMimeType(content_uri).mimetype;
 
       // Write EORC-20 operation to disk used for history
       const transaction = {
@@ -115,39 +95,26 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
       };
 
       // For on-disk history
-      disk_transactions.push(transaction);
-      // disk_operations.push({...opCode, id: transaction_hash});
-
-      // for Clickhouse history
-      // transactions.push(transaction);
-      // operations.push({...opCode, id: transaction_hash});
+      transactions.push(transaction);
       inserts++;
     }
   }
 
-  // Save operations buffer to disk
-  if ( disk_transactions.length) {
-    // console.log(`Writing ${transactions.length} transactions to disk`);
-    writers.transactions.write(disk_transactions.map(item => JSON.stringify(item) + "\n").join(""));
-    // writers.operations.write(disk_operations.map(item => JSON.stringify(item) + "\n").join(""));
+  // Save transactions to disk & clickhouse
+  if ( transactions.length) {
+    writers.transactions.write(transactions.map(item => JSON.stringify(item) + "\n").join(""));
+    saveCursor(cursor);
+
+    // Save to clickhouse
+    insert([...transactions]);
+    transactions.length = 0; // empty buffer memory
   }
-  // operations.length = 0;
-  disk_transactions.length = 0;
-  // operations = []; // clear buffer
-
-  // Save cursor
-  saveCursor(cursor);
-  blocks++;
-
-  // // Queue Clickhouse inserts
-  // queue.add(async () => {
-  //   await insert();
-  // });
 
   // logging
+  blocks++;
   const now = time();
   const rate = inserts / (now - init_timestamp);
-  logUpdate(`queue/inserts/blocks ${queue.size}(${transactions.length})/${inserts}/${blocks} at ${rate.toFixed(2)} op/s (${block_number} last block)`);
+  logUpdate(`queue/disk/inserts/blocks ${queue.size}/${inserts}/${clickhouse_inserts}/${blocks} at ${rate.toFixed(2)} op/s (${block_number} last block)`);
 });
 
 // End of Stream
