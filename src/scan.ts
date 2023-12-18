@@ -2,30 +2,12 @@ import fs from "node:fs";
 import readline from "node:readline";
 import { client } from "./clickhouse/createClient.js";
 import pQueue from "p-queue";
-import { Operation, TransactionRawData } from "./schemas.js";
+import { TransactionRawData } from "./schemas.js";
 
 const max_inserts = 1000;
 const queue = new pQueue({concurrency: 1});
 const transactions: TransactionRawData[][] = [];
 const buffer: TransactionRawData[] = [];
-
-// let operations = 0;
-let inserts = 0;
-let lines = 0;
-
-function timeout(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function insert(transactions: TransactionRawData[], operations: Operation[]) {
-    if ( transactions.length === 0 ) return;
-    inserts += transactions.length;
-    console.log(`Inserting ${transactions.length}/${inserts} transactions & operations (${transactions[0].block_number})...`);
-    await client.insert({table: "transactions", values: transactions, format: "JSONEachRow"})
-    await timeout(1000);
-    await client.insert({table: "operations", values: operations, format: "JSONEachRow"})
-    await timeout(1000);
-}
 
 
 console.log("Scanning inscriptions...");
@@ -39,6 +21,7 @@ function emptyBuffer() {
     buffer.length = 0;
 }
 
+let lines = 0;
 rl.on('line', async (line: string) => {
     const row = JSON.parse(line);
     buffer.push(row);
