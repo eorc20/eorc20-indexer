@@ -60,7 +60,7 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
   const block_number = blockNumberFromGenesis(clock.timestamp?.toDate());
   const timestamp = Number(clock.timestamp.seconds);
   const disk_transactions: TransactionRawData[] = [];
-  const disk_operations: Operation[] = [];
+  // const disk_operations: Operation[] = [];
 
   if (!message.transactionTraces) return;
   for ( const trace of message.transactionTraces ) {
@@ -116,7 +116,7 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
 
       // For on-disk history
       disk_transactions.push(transaction);
-      disk_operations.push({...opCode, id: transaction_hash});
+      // disk_operations.push({...opCode, id: transaction_hash});
 
       // for Clickhouse history
       // transactions.push(transaction);
@@ -129,7 +129,7 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
   if ( disk_transactions.length) {
     // console.log(`Writing ${transactions.length} transactions to disk`);
     writers.transactions.write(disk_transactions.map(item => JSON.stringify(item) + "\n").join(""));
-    writers.operations.write(disk_operations.map(item => JSON.stringify(item) + "\n").join(""));
+    // writers.operations.write(disk_operations.map(item => JSON.stringify(item) + "\n").join(""));
   }
   // operations.length = 0;
   disk_transactions.length = 0;
