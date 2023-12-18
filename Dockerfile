@@ -1,4 +1,4 @@
-FROM node
+FROM node:latest
 
 COPY package*.json ./
 RUN npm ci
