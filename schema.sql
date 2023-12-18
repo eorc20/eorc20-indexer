@@ -103,7 +103,7 @@ AS SELECT id, p, op, tick, amt FROM operations WHERE op = 'transfer';
 -- mint operations --
 CREATE MATERIALIZED VIEW operations_mint
 ENGINE = MergeTree()
-ORDER BY (tick, amt, block_number)
+ORDER BY (tick, block_number, transaction_index)
 POPULATE
 AS SELECT
   id,
@@ -120,9 +120,8 @@ AS SELECT
   tick,
   amt,
 FROM operations
-INNER JOIN transactions
-ON operations.id = transactions.transaction_hash AND op = 'mint' AND p = 'eorc20'
-ORDER BY (block_number, transaction_index);
+LEFT OUTER JOIN transactions
+ON operations.id = transactions.transaction_hash AND op = 'mint' AND p = 'eorc20';
 
 -- transfer operations --
 CREATE MATERIALIZED VIEW operations_transfer
@@ -209,3 +208,54 @@ FROM operations_mint
 INNER JOIN operations_deploy
 ON operations_deploy.tick = operations_mint.tick
 GROUP BY tick
+
+CREATE MATERIALIZED VIEW operations_mint
+ENGINE = MergeTree()
+ORDER BY (tick, block_number, transaction_index)
+POPULATE
+AS SELECT
+  id,
+  from_address as owner,
+  from_address as from,
+  to_address as to,
+  block_number,
+  transaction_index,
+  timestamp,
+  value,
+  content_uri,
+  p,
+  op,
+  tick,
+  amt,
+FROM (operations, operations_deploy)
+JOIN transactions
+ON operations.id = transactions.transaction_hash
+  AND op = 'mint'
+  AND p = 'eorc20'
+  AND operations_deploy.tick = operations_mint.tick;
+
+
+CREATE MATERIALIZED VIEW operations_mint
+ENGINE = ReplacingMergeTree()
+ORDER BY (id)
+POPULATE
+AS SELECT
+  id,
+  transactions.from_address as owner,
+  transactions.from_address as from,
+  transactions.to_address as to,
+  transactions.block_number,
+  transactions.transaction_index,
+  transactions.timestamp,
+  transactions.value,
+  transactions.content_uri,
+  first_value(p),
+  first_value(op),
+  first_value(tick),
+  first_value(amt),
+FROM operations
+JOIN transactions
+ON operations.id = transactions.transaction_hash
+  AND op = 'mint'
+  AND p = 'eorc20'
+GROUP BY id;
