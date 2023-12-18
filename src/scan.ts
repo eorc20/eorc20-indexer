@@ -77,4 +77,4 @@ export function scan() {
     });
 }
 
-// scan();
+scan();
