@@ -107,7 +107,7 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
 
       // Save operations buffer to disk
       if ( transactions.length) {
-        console.log(`Writing ${transactions.length} transactions to disk`);
+        // console.log(`Writing ${transactions.length} transactions to disk`);
         writer.write(transactions.map(item => JSON.stringify(item) + "\n").join(""));
       }
       // operations = []; // clear buffer
