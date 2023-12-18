@@ -7,7 +7,6 @@ import { parseOpCode } from "./eorc20.js";
 
 const queue = new pQueue({concurrency: 1});
 const transactions: any[] = [];
-const native_blocks: any[] = [];
 const operations: any[] = [];
 
 // let operations = 0;
@@ -20,11 +19,9 @@ async function insert() {
     // console.log(response);
     console.log(`Inserting ${transactions.length}/${inserts} transactions...`);
     await client.insert({table: "transactions", values: transactions, format: "JSONEachRow"})
-    await client.insert({table: "native_blocks", values: native_blocks, format: "JSONEachRow"})
     await client.insert({table: "operations", values: operations, format: "JSONEachRow"})
     // console.log(response);
     transactions.length = 0;
-    native_blocks.length = 0;
     operations.length = 0;
 }
 
@@ -46,7 +43,6 @@ rl.on('line', (line: string) => {
     queue.add(async () => {
         inserts++;
         transactions.push([row]);
-        native_blocks.push([{...row, final: true}]);
         operations.push({...opCode, id: row.transaction_hash});
         if (transactions.length >= 1000) await insert();
     });

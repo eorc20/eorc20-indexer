@@ -41,3 +41,14 @@ export interface NativeBlock {
     timestamp: number;              // 1702104171
     final: boolean;
 }
+
+
+export interface Operation {
+    id: string;
+    p: string;      // 'eorc20'
+    tick: string;   // 'eoss'
+    op: string;
+    amt?: string;    // '10000'
+    lim?: string;    // '10000'
+    prec?: number;    // 0
+}
