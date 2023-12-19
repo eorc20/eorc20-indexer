@@ -23,7 +23,7 @@ export const manifest = "https://github.com/pinax-network/substreams/releases/do
 export const outputModule = "map_transaction_traces";
 export const params = `map_action_traces=contract=eosio.evm&action=pushtx`;
 export const startBlockNum = Number(process.env.START_BLOCK ?? "345801951") // 345827395;
-// export const stopBlockNum = startBlockNum + 1;
+export const stopBlockNum = process.env.STOP_BLOCK ? Number(process.env.STOP_BLOCK) : undefined;
 
 // EOS EVM
 export const LOCK_GENESIS_TIME = new Date("2023-04-05T02:18:09Z");

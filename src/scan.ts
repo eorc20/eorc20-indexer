@@ -4,6 +4,10 @@ import { client } from "./clickhouse/createClient.js";
 import pQueue from "p-queue";
 import { TransactionRawData } from "./schemas.js";
 
+// npm run scan <start> <end>
+const START_SCAN = Number(process.argv[2] ?? 0);
+const END_SCAN = Number(process.argv[3] ?? Infinity);
+
 const max_inserts = 1000;
 const queue = new pQueue({concurrency: 1});
 const transactions: TransactionRawData[][] = [];
@@ -22,10 +26,12 @@ function emptyBuffer() {
 
 let lines = 0;
 rl.on('line', async (line: string) => {
-    const row = JSON.parse(line);
-    buffer.push(row);
-    if ( buffer.length >= max_inserts ) {
-        emptyBuffer();
+    if ( lines >= START_SCAN && lines <= END_SCAN ) {
+        const row = JSON.parse(line);
+        buffer.push(row);
+        if ( buffer.length >= max_inserts ) {
+            emptyBuffer();
+        }
     }
     lines++;
     if ( lines % 100000 === 0 ) console.log(`lines,buffer (${lines},${transactions.length})`);

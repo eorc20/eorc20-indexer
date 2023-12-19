@@ -114,13 +114,16 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
   blocks++;
   const now = time();
   const rate = inserts / (now - init_timestamp);
-  logUpdate(`queue/disk/inserts/blocks ${queue.size}/${inserts}/${clickhouse_inserts}/${blocks} at ${rate.toFixed(2)} op/s (${block_number}/${native_block_number} last blocks)`);
+  const blockRate = blocks / (now - init_timestamp);
+  logUpdate(`queue/disk/inserts/blocks ${queue.size}/${inserts}/${clickhouse_inserts}/${blocks} at ${rate.toFixed(2)} op/s ${blockRate.toFixed(2)} block/s (${block_number}/${native_block_number} evm/native blocks)`);
 });
 
 // End of Stream
 emitter.on("close", (error) => {
+  console.log("🏁 End of Stream");
   if (error) {
     console.error(error);
+    process.exit(70);
   }
 });
 
