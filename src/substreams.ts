@@ -62,8 +62,10 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
       if ( !to ) continue;
       if ( !tx.data ) continue;
       const content_uri = fromHex(tx.data, 'string');
-      const opCode = parseOpCode(content_uri);
-      if ( !opCode ) continue;
+      // const opCode = parseOpCode(content_uri);
+      // if ( !opCode ) continue;
+      const mimetype = getMimeType(content_uri);
+      if ( !mimetype ) continue;
       const from = await getFromAddress(rlptx);
       if ( !from ) continue;
       const sha = contentUriToSha256(content_uri);
@@ -79,7 +81,7 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
         creator: from,
         from_address: from,
         to_address: to,
-        ...getMimeType(content_uri),
+        ...mimetype,
         content_uri,
         value,
 
