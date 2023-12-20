@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import { Address, Hex, TransactionSerializableLegacy, fromHex, parseTransaction } from "viem";
+import { Hex, TransactionSerializableLegacy, fromHex, parseTransaction } from "viem";
 
 export type Ticker = string;
 
@@ -86,3 +86,16 @@ export function isValidAmount(amt: string) {
     }
     return true;
 }
+
+// const rlptx = "0xf86a808522ecb25c008301e84894aa2f34e41b397ad905e2f48059338522d05ca53480b83c646174613a2c7b2270223a22656f72633230222c226f70223a226d696e74222c227469636b223a22656f7373222c22616d74223a223130303030227d1b808855318063a0000000"
+
+// const tx = rlptxToTransaction(rlptx);
+// console.log(tx);
+
+
+// const content_uri = fromHex(tx?.data ?? '0x', 'string');
+// // const opCode = parseOpCode(content_uri);
+// // if ( !opCode ) continue;
+// const mimetype = getMimeType(content_uri);
+// const from = await getFromAddress(rlptx);
+// console.log({content_uri, mimetype, from})

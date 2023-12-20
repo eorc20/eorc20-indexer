@@ -17,7 +17,7 @@ const request = createRequest({
   outputModule,
   startBlockNum,
   stopBlockNum,
-  startCursor: readCursor(),
+  // startCursor: readCursor(),
   finalBlocksOnly: true,
   // productionMode: true,
 });

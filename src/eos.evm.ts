@@ -48,23 +48,23 @@ export async function getFromAddress(rlptx: Hex) {
     const tx = parseTransaction(rlptx);
     if ( !tx.v) return null;
 
-    const r = tx.r === "0x" ? BigInt(0) : hexToBigInt(tx.r);
-    const s = hexToBigInt(tx.s);
+    const r = tx.r === "0x" ? BigInt(0) : hexToBigInt(tx.r as any) as any;
+    const s = hexToBigInt(tx.s as any) as any;
 
     if( isSpecialSignature(r, s) ) {
         return decodeSpecialSignature(s);
     }
 
     const v = tx.v - 17777n * 2n - 35n;
-    const signature = signatureToHex({ v, r: tx.r, s: tx.s });
+    const signature = signatureToHex({ v, r, s });
     const hash = keccak256(serializeTransaction({ ...tx }));
     const addres = await recoverAddress({hash, signature});
     if ( !addres ) return null;
     return addres.toLowerCase() as Address;
 }
 
-//Regular
-//getFromAddress("0xf8ab048522ecb25c00828f5c94bb8e513b2897ac9c1c47eecfcb42dbd4b77f927580b844a9059cbb000000000000000000000000bb8e513b2897ac9c1c47eecfcb42dbd4b77f92750000000000000000000000000000000000000000000000008ac7230489e80000828b05a0542ee96294eddefe0dee60b67610191e4bea5ce093fef85587f557a40c3d8570a021080e7c84bb2a40b5bb94971146dea5968ce9eae868d94bffae8fa6c1282feb").then(console.log);
+// // Regular
+// getFromAddress("0xf8ab048522ecb25c00828f5c94bb8e513b2897ac9c1c47eecfcb42dbd4b77f927580b844a9059cbb000000000000000000000000bb8e513b2897ac9c1c47eecfcb42dbd4b77f92750000000000000000000000000000000000000000000000008ac7230489e80000828b05a0542ee96294eddefe0dee60b67610191e4bea5ce093fef85587f557a40c3d8570a021080e7c84bb2a40b5bb94971146dea5968ce9eae868d94bffae8fa6c1282feb").then(console.log);
 
-//Special (type 1)
-//getFromAddress("0xf7824f468522ecb25c0082520894d10ca73e34fc6c7c530654cb9adb0810e7771320890579848dee9ab30000801b80885530ea015b900000").then(console.log);
+// // Special (type 1)
+// getFromAddress("0xf7824f468522ecb25c0082520894d10ca73e34fc6c7c530654cb9adb0810e7771320890579848dee9ab30000801b80885530ea015b900000").then(console.log);

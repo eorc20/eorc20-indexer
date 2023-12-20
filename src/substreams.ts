@@ -45,7 +45,10 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
 
   if (!message.transactionTraces) return;
   for ( const trace of message.transactionTraces ) {
-    if ( trace.receipt.status !== "TRANSACTIONSTATUS_EXECUTED") return;
+    if ( trace.receipt.status !== "TRANSACTIONSTATUS_EXECUTED") {
+      console.log("skipping transaction", trace.receipt.status);
+      return;
+    }
     if ( !trace.actionTraces ) continue;
     for ( const action of trace.actionTraces) {
       if ( action.action.name !== "pushtx" ) continue;
@@ -62,8 +65,8 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
       if ( !to ) continue;
       if ( !tx.data ) continue;
       const content_uri = fromHex(tx.data, 'string');
-      // const opCode = parseOpCode(content_uri);
-      // if ( !opCode ) continue;
+      const opCode = parseOpCode(content_uri);
+      if ( !opCode ) continue;
       const mimetype = getMimeType(content_uri);
       if ( !mimetype ) continue;
       const from = await getFromAddress(rlptx);
@@ -107,7 +110,7 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
     writers.transactions.write(transactions.map(item => JSON.stringify(item) + "\n").join(""));
     saveCursor(cursor);
 
-    // Save to clickhouse
+    // Insert to Clickhouse DB
     insert([...transactions]);
     transactions.length = 0; // empty buffer memory
   }
