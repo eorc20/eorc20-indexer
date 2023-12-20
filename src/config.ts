@@ -50,6 +50,8 @@ export const writers = {
 export const VERBOSE = true;
 export const PAUSED = process.env.PAUSED === "true";
 export const IGNORE_SCAN = process.env.IGNORE_SCAN === "true";
+export const SAVE_ON_DISK = process.env.SAVE_ON_DISK === "true";
+export const SAVE_ON_DATABASE = process.env.SAVE_ON_DATABASE === "true";
 
 // ClickHouse
 export const HOST = process.env.HOST ?? DEFAULT_HOST;

@@ -2,7 +2,7 @@ import { emitter } from "./BlockEmitter.js";
 import { saveCursor } from "./utils.js";
 import { blockNumberFromGenesis, getFromAddress, toTransactionId } from "./eos.evm.js";
 import { parseOpCode, rlptxToTransaction, contentUriToSha256 } from "./eorc20.js";
-import { writers } from "./config.js";
+import { SAVE_ON_DATABASE, SAVE_ON_DISK, writers } from "./config.js";
 import logUpdate from "log-update";
 import { Hex, fromHex } from "viem";
 import { TransactionRawData } from "./schemas.js";
@@ -99,7 +99,7 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
         miner,
       };
 
-      // For on-disk history
+      // Buffer transactions to save
       transactions.push(transaction);
       inserts++;
     }
@@ -107,11 +107,15 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
 
   // Save transactions to disk & clickhouse
   if ( transactions.length) {
-    writers.transactions.write(transactions.map(item => JSON.stringify(item) + "\n").join(""));
-    saveCursor(cursor);
+    if (SAVE_ON_DISK) {
+      writers.transactions.write(transactions.map(item => JSON.stringify(item) + "\n").join(""));
+    }
 
     // Insert to Clickhouse DB
-    insert([...transactions]);
+    if ( SAVE_ON_DATABASE ) {
+      insert([...transactions]);
+    }
+    saveCursor(cursor);
     transactions.length = 0; // empty buffer memory
   }
 
