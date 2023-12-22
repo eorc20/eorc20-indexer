@@ -19,7 +19,7 @@ const buffer: TransactionRawData[] = [];
 
 console.log("Scanning inscriptions...");
 const rl = readline.createInterface({
-    input: fs.createReadStream("./data/pushtx-transactions2.jsonl"),
+    input: fs.createReadStream("./data/transactions.jsonl"),
     crlfDelay: Infinity,
 });
 

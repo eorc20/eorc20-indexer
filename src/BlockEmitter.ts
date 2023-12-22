@@ -1,7 +1,7 @@
 import { readPackage } from "@substreams/manifest";
 import { createRegistry, createRequest, applyParams } from "@substreams/core";
 import { BlockEmitter, createNodeTransport } from "@substreams/node";
-import { token, baseUrl, manifest, outputModule, params, startBlockNum, stopBlockNum } from "./config.js";
+import { token, baseUrl, manifest, outputModule, params, startBlockNum, stopBlockNum, FINAL_BLOCKS_ONLY } from "./config.js";
 import { readCursor } from "./utils.js";
 
 // Read Substream
@@ -18,7 +18,7 @@ const request = createRequest({
   startBlockNum,
   stopBlockNum,
   // startCursor: readCursor(),
-  finalBlocksOnly: true,
+  finalBlocksOnly: FINAL_BLOCKS_ONLY,
   // productionMode: true,
 });
 
