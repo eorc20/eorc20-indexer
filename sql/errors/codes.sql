@@ -16,3 +16,4 @@ INSERT INTO codes VALUES (2, 'mint after stop block');
 
 -- transfer errors --
 INSERT INTO codes VALUES (3, 'transfer after start block');
+INSERT INTO codes VALUES (4, 'transfer insufficient balance');

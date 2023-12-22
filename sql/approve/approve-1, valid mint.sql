@@ -2,8 +2,8 @@
 DROP TABLE IF EXISTS approve_1_mv;
 CREATE MATERIALIZED VIEW approve_1_mv TO approve AS
 SELECT
-    id,
     op,
+    id,
 FROM mint
 JOIN overrides ON overrides.tick == mint.tick
 WHERE
@@ -15,8 +15,8 @@ WHERE
 
 -- insert --
 INSERT INTO approve SELECT
-    id,
     op,
+    id,
 FROM mint
 JOIN overrides ON overrides.tick == mint.tick
 WHERE
