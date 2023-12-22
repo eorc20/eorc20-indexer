@@ -1,4 +1,5 @@
 -- table --
+DROP TABLE IF EXISTS transfer;
 CREATE TABLE transfer
 (
     id                      FixedString(66),
@@ -9,6 +10,7 @@ CREATE TABLE transfer
     tick                    LowCardinality(String),
     amt                     UInt64,
     block_number            UInt32(),
+    native_block_number     UInt32(),
     timestamp               DateTime,
     transaction_index       UInt32()
 )
@@ -16,6 +18,7 @@ ENGINE = ReplacingMergeTree
 ORDER BY (id);
 
 -- view --
+DROP TABLE IF EXISTS transfer_mv;
 CREATE MATERIALIZED VIEW transfer_mv TO transfer AS
 SELECT
     id,
@@ -26,6 +29,7 @@ SELECT
     visitParamExtractString(data, 'tick') as tick,
     visitParamExtractString(data, 'amt') as amt,
     block_number,
+    native_block_number,
     timestamp,
     transaction_index,
 FROM data_json
@@ -34,4 +38,11 @@ WHERE
     op = 'transfer' AND
     notEmpty(tick) AND
     notEmpty(amt) AND
-    toInt128(amt) > 0;
+    toInt128(amt) > 0 AND
+    toInt128(amt) <= 18446744073709551615 AND
+    tick IN (
+        SELECT tick FROM deploy
+        WHERE
+            deploy.tick = tick AND
+            block_number >= deploy.block_number
+    );

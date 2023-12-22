@@ -37,7 +37,6 @@ rl.on('line', async (line: string) => {
     if ( lines >= START_SCAN && lines <= END_SCAN ) {
         const row = await JSON.parse(line);
         if ( !row ) return;
-        if ( row.miner !== "miner.enf") return;
         inserts++;
         // writer.write(`${JSON.stringify(row)}\n`);
         // const row = JSON.parse(line);

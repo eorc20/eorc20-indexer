@@ -1,4 +1,5 @@
 -- table --
+DROP TABLE IF EXISTS data_json;
 CREATE TABLE data_json
 (
     id                      FixedString(66),
@@ -7,6 +8,7 @@ CREATE TABLE data_json
     data                    String,
     mimetype                LowCardinality(String),
     block_number            UInt32(),
+    native_block_number     UInt32(),
     timestamp               DateTime,
     transaction_index       UInt32(),
 )
@@ -14,6 +16,7 @@ ENGINE = ReplacingMergeTree
 ORDER BY (id);
 
 -- view --
+DROP TABLE IF EXISTS data_json_mv;
 CREATE MATERIALIZED VIEW data_json_mv TO data_json AS
 SELECT
     transaction_hash as id,
@@ -22,6 +25,7 @@ SELECT
     replaceRegexpOne(content_uri, 'data:(application/json)?,', '') as data,
     mimetype,
     block_number,
+    native_block_number,
     timestamp,
     transaction_index,
 FROM transactions;
@@ -34,6 +38,7 @@ INSERT INTO data_json SELECT
     replaceRegexpOne(content_uri, 'data:(application/json)?,', '') as data,
     mimetype,
     block_number,
+    native_block_number,
     timestamp,
     transaction_index,
 FROM transactions;
