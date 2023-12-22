@@ -8,7 +8,7 @@ CREATE TABLE transfer
     p                       LowCardinality(String),
     op                      LowCardinality(String),
     tick                    LowCardinality(String),
-    amt                     UInt64,
+    amt                     Int128,
     block_number            UInt32(),
     native_block_number     UInt32(),
     timestamp               DateTime,

@@ -2,8 +2,8 @@
 DROP TABLE IF EXISTS approve;
 CREATE TABLE approve
 (
-    id          FixedString(66),
-    op          LowCardinality(String)
+    op          LowCardinality(String),
+    id          FixedString(66)
 )
 ENGINE = ReplacingMergeTree
-ORDER BY (id);
+ORDER BY (op, id);

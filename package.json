@@ -23,6 +23,7 @@
   "scripts": {
     "start": "tsc && node ./dist/bin/cli.js",
     "scan": "tsc && node ./dist/src/scan.js",
+    "pending": "tsc && node ./dist/src/pending.js",
     "test": "bun test",
     "posttest": "tsc --noEmit",
     "prepublishOnly": "tsc"
