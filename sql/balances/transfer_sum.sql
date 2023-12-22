@@ -13,6 +13,7 @@ AS SELECT
     first_value(timestamp) as first_timestamp,
     last_value(timestamp) as last_timestamp
 FROM transfer
+WHERE id IN (SELECT id FROM approve)
 GROUP BY
     from,
     to,
@@ -30,6 +31,7 @@ INSERT INTO transfer_sum_mv SELECT
     first_value(timestamp) as first_timestamp,
     last_value(timestamp) as last_timestamp
 FROM transfer
+WHERE id IN (SELECT id FROM approve)
 GROUP BY
     from,
     to,

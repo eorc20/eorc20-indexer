@@ -12,6 +12,7 @@ AS SELECT
     first_value(timestamp) as first_timestamp,
     last_value(timestamp) as last_timestamp
 FROM mint
+WHERE id IN (SELECT id FROM approve)
 GROUP BY from, tick;
 
 OPTIMIZE TABLE mint_sum_mv FINAL;
@@ -25,4 +26,5 @@ INSERT INTO mint_sum_mv SELECT
     first_value(timestamp) as first_timestamp,
     last_value(timestamp) as last_timestamp
 FROM mint
+WHERE id IN (SELECT id FROM approve)
 GROUP BY from, tick;

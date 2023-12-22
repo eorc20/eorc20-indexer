@@ -1,5 +1,6 @@
 -- table --
-CREATE TABLE IF NOT EXISTS codes
+DROP TABLE IF EXISTS codes;
+CREATE TABLE codes
 (
     code        UInt16(),
     msg         String
@@ -9,12 +10,9 @@ ORDER BY (code);
 
 INSERT INTO codes VALUES (0, 'success');
 
--- ticker errors --
-INSERT INTO codes VALUES (1, 'tick must exists in deploy');
-
 -- mint errors --
-INSERT INTO codes VALUES (2, 'mint amt must equal to lim');
+INSERT INTO codes VALUES (1, 'mint before start block');
+INSERT INTO codes VALUES (2, 'mint after stop block');
 
 -- transfer errors --
-
--- deploy errors --
+INSERT INTO codes VALUES (3, 'transfer after start block');

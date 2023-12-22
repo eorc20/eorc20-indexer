@@ -39,10 +39,26 @@ WHERE
     notEmpty(tick) AND
     notEmpty(amt) AND
     toInt128(amt) > 0 AND
-    toInt128(amt) <= 18446744073709551615 AND
-    tick IN (
-        SELECT tick FROM deploy
-        WHERE
-            deploy.tick = tick AND
-            block_number >= deploy.block_number
-    );
+    toInt128(amt) <= 18446744073709551615;
+
+-- insert --
+INSERT INTO transfer SELECT
+    id,
+    from,
+    to,
+    visitParamExtractString(data, 'p') as p,
+    visitParamExtractString(data, 'op') as op,
+    visitParamExtractString(data, 'tick') as tick,
+    visitParamExtractString(data, 'amt') as amt,
+    block_number,
+    native_block_number,
+    timestamp,
+    transaction_index,
+FROM data_json
+WHERE
+    p = 'eorc20' AND
+    op = 'transfer' AND
+    notEmpty(tick) AND
+    notEmpty(amt) AND
+    toInt128(amt) > 0 AND
+    toInt128(amt) <= 18446744073709551615
