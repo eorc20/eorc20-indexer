@@ -124,7 +124,7 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
   const now = time();
   const rate = inserts / (now - init_timestamp);
   const blockRate = blocks / (now - init_timestamp);
-  logUpdate(`queue/disk/inserts/blocks ${queue.size}/${inserts}/${clickhouse_inserts}/${blocks} at ${rate.toFixed(2)} op/s ${blockRate.toFixed(2)} block/s (${block_number}/${native_block_number} evm/native blocks)`);
+  logUpdate(`${queue.size}/${inserts}/${clickhouse_inserts}/${blocks} at ${rate.toFixed(2)} op/s ${blockRate.toFixed(2)} block/s (blocks ${block_number} evm | ${native_block_number} native)`);
 });
 
 // End of Stream
