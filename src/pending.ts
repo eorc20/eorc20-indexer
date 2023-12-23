@@ -4,9 +4,9 @@ console.log("Downloading pending transfers...");
 
 const query = `
 SELECT * FROM transfer
-WHERE id NOT IN
-(SELECT id FROM approve WHERE op = 'transfer') AND
-id NOT IN (SELECT id FROM errors WHERE op = 'transfer')
+WHERE id
+NOT IN (SELECT id FROM errors_transfer WHERE errors_transfer.id = id) AND
+id NOT IN (SELECT id FROM approve_transfer WHERE approve_transfer.id = id)
 ORDER BY (block_number, transaction_index)
 LIMIT 1
 `;
@@ -44,18 +44,18 @@ const tick = 'eoss';
 
 async function approve(id: Hex) {
     const query = `
-        INSERT INTO approve SELECT 'transfer', '${id}'
+        INSERT INTO approve_transfer SELECT '${id}'
     `
     const response = await client.exec({query})
-    console.log(`approve transfer id = ${id} [${response.query_id}]`);
+    console.log(`approve_transfer transfer id = ${id} (${metrics.approve}/${metrics.error})`);
 }
 
 async function error(id: Hex, code: number) {
     const query = `
-        INSERT INTO errors SELECT 'transfer', '${id}', ${code}
+        INSERT INTO errors_transfer SELECT '${id}', ${code}
     `
     const response = await client.exec({query})
-    console.log(`errors.transfer (code=${code}) id = ${id}`);
+    console.log(`errors.transfer (code=${code}) id = ${id} (${metrics.approve}/${metrics.error})`);
 }
 
 function sleep(ms: number) {
@@ -68,6 +68,7 @@ const metrics = {
     retry: 0,
 }
 while (true) {
+    await sleep(500);
     const response = await client.query({query});
     const json: {data: Transfer[]} = await response.json();
     if ( !json.data.length ) {
@@ -77,7 +78,6 @@ while (true) {
     }
 
     for ( const transfer of json.data ) {
-        await sleep(500);
         if ( transfer.tick !== tick ) continue;
 
         // get available balance

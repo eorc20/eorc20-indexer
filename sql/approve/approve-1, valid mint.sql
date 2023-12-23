@@ -1,9 +1,8 @@
 -- view (approve-1, valid mint) --
-DROP TABLE IF EXISTS approve_1_mv;
-CREATE MATERIALIZED VIEW approve_1_mv TO approve AS
+DROP TABLE IF EXISTS approve_mint_1_mv;
+CREATE MATERIALIZED VIEW approve_mint_1_mv TO approve_mint AS
 SELECT
-    op,
-    id,
+    id
 FROM mint
 JOIN overrides ON overrides.tick == mint.tick
 WHERE
@@ -14,9 +13,8 @@ WHERE
     (mint.native_block_number == overrides.mint_stop_native_block_number AND mint.transaction_index <= overrides.mint_stop_transaction_index );
 
 -- insert --
-INSERT INTO approve SELECT
-    op,
-    id,
+INSERT INTO approve_mint SELECT
+    id
 FROM mint
 JOIN overrides ON overrides.tick == mint.tick
 WHERE
