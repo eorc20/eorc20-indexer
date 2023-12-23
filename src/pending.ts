@@ -68,7 +68,7 @@ const metrics = {
     retry: 0,
 }
 while (true) {
-    await sleep(500);
+    await sleep(1000);
     const response = await client.query({query});
     const json: {data: Transfer[]} = await response.json();
     if ( !json.data.length ) {
@@ -86,6 +86,7 @@ while (true) {
 
         // compute remaining balance after transfer
         const balance = availableBalance - Number(transfer.amt);
+        console.log({transfer, availableBalance, balance})
 
         // error (5) - cannot transfer to self
         if ( transfer.from === transfer.to ) {
