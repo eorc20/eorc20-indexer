@@ -78,30 +78,37 @@ while (true) {
 
     for ( const transfer of json.data ) {
         if ( transfer.tick !== tick ) continue;
+
+        // get available balance
         let availableBalance = await getBalance(transfer.from, tick);
         if ( availableBalance === null ) continue;
-        const balance = availableBalance - Number(transfer.amt);
-        console.log({transfer, availableBalance, balance});
 
-        // error - cannot transfer to self
+        // compute remaining balance after transfer
+        const balance = availableBalance - Number(transfer.amt);
+
+        // error (5) - cannot transfer to self
         if ( transfer.from === transfer.to ) {
             await error(transfer.id, 5);
             metrics.error++;
             continue;
         }
 
-        // approve
-        if ( balance > 0 ) {
-            // console.log(`approve ${transfer.from} ${balance}`);
-            await approve(transfer.id);
-            metrics.approve++;
-            continue;
-
-        // error - insufficient balance
-        } else {
-            console.error(`error ${transfer.id}`);
+        // error (4) - insufficient balance
+        else if ( balance < 0 ) {
             await error(transfer.id, 4);
             metrics.error++;
+            continue;
+
+        // error (6) - decimals is invalid
+        } else if ( Number(transfer.amt) !== Math.floor(Number(transfer.amt)) ) {
+            await error(transfer.id, 6);
+            metrics.error++;
+            continue;
+
+        // approve
+        } else {
+            await approve(transfer.id);
+            metrics.approve++;
             continue;
         }
     };
