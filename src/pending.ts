@@ -55,7 +55,7 @@ async function error(id: Hex, code: number) {
         INSERT INTO errors SELECT 'transfer', '${id}', ${code}
     `
     const response = await client.exec({query})
-    console.log(`errors transfer id = ${id} [${response.query_id}]`);
+    console.log(`errors.transfer (code=${code}) id = ${id} [${response.query_id}]`);
 }
 
 function sleep(ms: number) {
@@ -68,16 +68,16 @@ const metrics = {
     retry: 0,
 }
 while (true) {
-    await sleep(500);
     const response = await client.query({query});
     const json: {data: Transfer[]} = await response.json();
-    console.log(`Pending transfers: ${metrics.approve}/${metrics.error} (${json.data.length}/${metrics.retry++})`);
     if ( !json.data.length ) {
-        console.log("No pending transfers");
+        console.log(`Pending transfers: ${metrics.approve}/${metrics.error} (${json.data.length}/${metrics.retry++})`);
+        await sleep(1000);
         continue;
     }
 
     for ( const transfer of json.data ) {
+        await sleep(500);
         if ( transfer.tick !== tick ) continue;
 
         // get available balance
