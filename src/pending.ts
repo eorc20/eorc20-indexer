@@ -50,9 +50,9 @@ async function approve(id: Hex) {
     console.log(`approve transfer id = ${id} [${response.query_id}]`);
 }
 
-async function error(id: Hex) {
+async function error(id: Hex, code: number) {
     const query = `
-        INSERT INTO errors SELECT 'transfer', '${id}', 4
+        INSERT INTO errors SELECT 'transfer', '${id}', ${code}
     `
     const response = await client.exec({query})
     console.log(`errors transfer id = ${id} [${response.query_id}]`);
@@ -83,19 +83,29 @@ while (true) {
         const balance = availableBalance - Number(transfer.amt);
         console.log({transfer, availableBalance, balance});
 
+        // error - cannot transfer to self
+        if ( transfer.from === transfer.to ) {
+            await error(transfer.id, 5);
+            metrics.error++;
+            continue;
+        }
+
         // approve
         if ( balance > 0 ) {
             // console.log(`approve ${transfer.from} ${balance}`);
             await approve(transfer.id);
             metrics.approve++;
-            // error
+            continue;
+
+        // error - insufficient balance
         } else {
             console.error(`error ${transfer.id}`);
-            await error(transfer.id);
+            await error(transfer.id, 4);
             metrics.error++;
+            continue;
         }
-        await sleep(500);
     };
+    await sleep(500);
 }
 
 // getBalance("0x354d44ad5ecbe2b6244a63b24babff9aa5200303")
