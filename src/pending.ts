@@ -55,7 +55,7 @@ async function error(id: Hex, code: number) {
         INSERT INTO errors SELECT 'transfer', '${id}', ${code}
     `
     const response = await client.exec({query})
-    console.log(`errors.transfer (code=${code}) id = ${id} [${response.query_id}]`);
+    console.log(`errors.transfer (code=${code}) id = ${id}`);
 }
 
 function sleep(ms: number) {
