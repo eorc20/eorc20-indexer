@@ -68,11 +68,12 @@ const metrics = {
     retry: 0,
 }
 while (true) {
+    await sleep(500);
     const response = await client.query({query});
     const json: {data: Transfer[]} = await response.json();
     console.log(`Pending transfers: ${metrics.approve}/${metrics.error} (${json.data.length}/${metrics.retry++})`);
     if ( !json.data.length ) {
-        await sleep(1000);
+        console.log("No pending transfers");
         continue;
     }
 
@@ -112,7 +113,6 @@ while (true) {
             continue;
         }
     };
-    await sleep(500);
 }
 
 // getBalance("0x354d44ad5ecbe2b6244a63b24babff9aa5200303")
