@@ -18,3 +18,7 @@ export function readCursor() {
 export function saveCursor(cursor: string) {
     fs.writeFileSync(CURSOR_PATH, cursor);
 }
+
+export function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}

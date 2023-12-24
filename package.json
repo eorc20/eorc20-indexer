@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@clickhouse/client": "latest",
+    "@clickhouse/client-web": "latest",
     "@sinclair/typebox": "latest",
     "@substreams/core": "^0.8.0",
     "@substreams/manifest": "^0.7.0",

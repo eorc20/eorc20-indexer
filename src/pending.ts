@@ -1,119 +1,79 @@
-import { Address, Hex } from "viem";
-import { client } from "./clickhouse/createClient.js";
-console.log("Downloading pending transfers...");
 
-const query = `
-SELECT * FROM transfer
-WHERE id
-NOT IN (SELECT id FROM errors_transfer WHERE errors_transfer.id = id) AND
-id NOT IN (SELECT id FROM approve_transfer WHERE approve_transfer.id = id)
-ORDER BY (block_number, transaction_index)
-LIMIT 1
-`;
-
-interface Transfer {
-    id: Hex;                      // '0x19b37d87d35a2a2dfabb69147c9148b97d68d42d7b97cc1021ed163d9a098c52'
-    from: Address;                // '0x354d44ad5ecbe2b6244a63b24babff9aa5200303'
-    to: Address;                  // '0xad1c853bc9607b4c5324a44df9ba42fd918276ad'
-    p: string;                    // 'eorc20'
-    op: string;                   // 'transfer'
-    tick: string;                 // 'eoss'
-    amt: string;                  // '10000000'
-    block_number: number;         // 21536442
-    native_block_number: number;  // 346013363
-    timestamp: string;            // '2023-12-10 08:38:50'
-    transaction_index: number;    // 0
-}
-
-async function getBalance(address: Address, tick: string): Promise<number|null> {
-    const response = await fetch(`https://api.eorc20.io/tokens?address=${address}`)
-    try {
-        const json: {data: {amount: number, tick: string}[]} = await response.json();
-        if ( !json.data.length) return 0;
-        for ( const row of json.data ) {
-            if ( row.tick === tick ) return row.amount;
-        }
-        return 0;
-    } catch (e) {
-        console.error(e);
-        return null;
-    }
-}
+import { sleep } from "./utils.js";
+import { metrics } from "./pending/metrics.js";
+import { getLastPendingTransfer } from "./pending/getLastPendingTransfer.js";
+import { getTokensByAddress } from "./pending/getTokensByAddress.js";
+import { approve, confirmTransaction, error } from "./pending/approve.js";
+import { Hex } from "viem";
+console.log("🤖 start monitoring pending transfers...");
 
 const tick = 'eoss';
 
-async function approve(id: Hex) {
-    const query = `
-        INSERT INTO approve_transfer SELECT '${id}'
-    `
-    const response = await client.exec({query})
-    console.log(`approve_transfer transfer id = ${id} (${metrics.approve}/${metrics.error})`);
-}
+let confirm_last_id = new Set<Hex>()
 
-async function error(id: Hex, code: number) {
-    const query = `
-        INSERT INTO errors_transfer SELECT '${id}', ${code}
-    `
-    const response = await client.exec({query})
-    console.log(`errors.transfer (code=${code}) id = ${id} (${metrics.approve}/${metrics.error})`);
-}
-
-function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-const metrics = {
-    approve: 0,
-    error: 0,
-    retry: 0,
-}
 while (true) {
     await sleep(1000);
-    const response = await client.query({query});
-    const json: {data: Transfer[]} = await response.json();
-    if ( !json.data.length ) {
-        console.log(`Pending transfers: ${metrics.approve}/${metrics.error} (${json.data.length}/${metrics.retry++})`);
+    // get last confirmed transfer
+    if ( confirm_last_id.size ) {
+        const id = confirm_last_id.values().next().value;
+        const confirmed = await confirmTransaction(id);
+        if ( confirmed ) {
+            confirm_last_id.delete(id);
+            console.log(`✅ confirmed transfer id = ${id}`);
+        } else {
+            console.log(`⚠️ NOT confirmed transfer id = ${id}`);
+            continue;
+        }
+    }
+
+    // get last pending transfer
+    const pendingTransfer = await getLastPendingTransfer(tick);
+    if ( !pendingTransfer ) {
+        console.log(`no pending transfers | approved/errors ${metrics.approve}/${metrics.error} (retry=${metrics.retry++})`);
         await sleep(1000);
         continue;
     }
+    // Values from pending Transfer
+    const { id, from, to } = pendingTransfer;
+    const amt = Number(pendingTransfer.amt);
 
-    for ( const transfer of json.data ) {
-        if ( transfer.tick !== tick ) continue;
+    // get available balance
+    let availableBalance = await getTokensByAddress(from, tick);
+    if ( availableBalance === null ) {
+        console.error(`❌ failed to get balance for ${from}`);
+        continue;
+    }
 
-        // get available balance
-        let availableBalance = await getBalance(transfer.from, tick);
-        if ( availableBalance === null ) continue;
+    // compute remaining balance after transfer
+    const balance = availableBalance - amt;
+    console.log({pendingTransfer, availableBalance, balance})
 
-        // compute remaining balance after transfer
-        const balance = availableBalance - Number(transfer.amt);
-        console.log({transfer, availableBalance, balance})
+    // error (5) - cannot transfer to self
+    if ( from === to ) {
+        await error(id, 5);
+        confirm_last_id.add(id);
+        metrics.error++;
+        continue;
 
-        // error (5) - cannot transfer to self
-        if ( transfer.from === transfer.to ) {
-            await error(transfer.id, 5);
-            metrics.error++;
-            continue;
-        }
+    // error (4) - insufficient balance
+    } else if ( balance < 0 ) {
+        await error(id, 4);
+        confirm_last_id.add(id);
+        metrics.error++;
+        continue;
 
-        // error (4) - insufficient balance
-        else if ( balance < 0 ) {
-            await error(transfer.id, 4);
-            metrics.error++;
-            continue;
+    // error (6) - decimals is invalid
+    } else if (amt !== Math.floor(amt) ) {
+        await error(id, 6);
+        confirm_last_id.add(id);
+        metrics.error++;
+        continue;
 
-        // error (6) - decimals is invalid
-        } else if ( Number(transfer.amt) !== Math.floor(Number(transfer.amt)) ) {
-            await error(transfer.id, 6);
-            metrics.error++;
-            continue;
-
-        // approve
-        } else {
-            await approve(transfer.id);
-            metrics.approve++;
-            continue;
-        }
-    };
+    // fallback to approve
+    } else {
+        await approve(id);
+        confirm_last_id.add(id);
+        metrics.approve++;
+        continue;
+    }
 }
-
-// getBalance("0x354d44ad5ecbe2b6244a63b24babff9aa5200303")
