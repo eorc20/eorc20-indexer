@@ -24,6 +24,7 @@
     "start": "tsc && node ./dist/bin/cli.js",
     "scan": "tsc && node ./dist/src/scan.js",
     "pending": "tsc && node ./dist/src/pending.js",
+    "examples": "tsc && node ./dist/examples/download-examples.js",
     "test": "bun test",
     "posttest": "tsc --noEmit",
     "prepublishOnly": "tsc"

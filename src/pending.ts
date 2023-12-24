@@ -5,9 +5,15 @@ import { getLastPendingTransfer } from "./pending/getLastPendingTransfer.js";
 import { getTokensByAddress } from "./pending/getTokensByAddress.js";
 import { approve, confirmTransaction, error } from "./pending/approve.js";
 import { Hex } from "viem";
+import { PAUSED } from "./config.js";
 console.log("🤖 start monitoring pending transfers...");
 
 const tick = 'eoss';
+
+if ( PAUSED ) {
+    console.log("Paused");
+    process.exit(0);
+}
 
 let confirm_last_id = new Set<Hex>()
 
@@ -34,11 +40,11 @@ while (true) {
         continue;
     }
     // Values from pending Transfer
-    const { id, from, to } = pendingTransfer;
+    const { id, from, to, block_number } = pendingTransfer;
     const amt = Number(pendingTransfer.amt);
 
     // get available balance
-    let availableBalance = await getTokensByAddress(from, tick);
+    let availableBalance = await getTokensByAddress(from, tick, block_number);
     if ( availableBalance === null ) {
         console.error(`❌ failed to get balance for ${from}`);
         continue;
@@ -72,6 +78,7 @@ while (true) {
     // fallback to approve
     } else {
         await approve(id);
+        await sleep(1000);
         confirm_last_id.add(id);
         metrics.approve++;
         continue;
