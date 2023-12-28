@@ -6,8 +6,8 @@ export const client = createClient({
     password: PASSWORD,
     database: DATABASE,
     clickhouse_settings: {
-        // wait_for_async_insert: 1, // 0
-        async_insert: 0, // 1
+        wait_for_async_insert: 0, // 0
+        async_insert: 1, // 1
         readonly: "0",
     },
     application: "EORC-20 Indexer",
