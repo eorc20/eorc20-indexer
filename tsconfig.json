@@ -17,8 +17,7 @@
     },
     "include": [
       "index.ts",
-      "bin/cli.ts",
-      "src/**/*",
-      "examples/**/*"
+      "bin/*",
+      "src/**/*"
     ]
   }

@@ -1,9 +1,10 @@
+#!/usr/bin/env node
+
 import fs from "node:fs";
 import readline from "node:readline";
-import { client } from "./clickhouse/createClient.js";
+import { client } from "../src/clickhouse/createClient.js";
 import pQueue from "p-queue";
-import { TransactionRawData } from "./schemas.js";
-// import { parsePushtx } from "./transaction.js";
+import { TransactionRawData } from "../src/schemas.js";
 
 // npm run scan <start> <end>
 const START_SCAN = Number(process.argv[2] ?? 0);
@@ -14,8 +15,6 @@ const max_inserts = 1000;
 const queue = new pQueue({concurrency: 1});
 const transactions: TransactionRawData[][] = [];
 const buffer: TransactionRawData[] = [];
-
-// const writer = fs.createWriteStream("./data/pushtx-transactions2.jsonl", {flags: "a"});
 
 console.log("Scanning inscriptions...");
 const rl = readline.createInterface({
