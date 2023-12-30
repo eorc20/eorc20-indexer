@@ -18,3 +18,7 @@ INSERT INTO codes VALUES (2, 'mint after stop block');
 INSERT INTO codes VALUES (3, 'transfer after start block');
 INSERT INTO codes VALUES (4, 'transfer insufficient balance');
 INSERT INTO codes VALUES (5, 'transfer cannot transfer to self');
+INSERT INTO codes VALUES (6, 'transfer decimals is invalid');
+
+-- block errors --
+INSERT INTO codes VALUES (10, 'native block not final');
