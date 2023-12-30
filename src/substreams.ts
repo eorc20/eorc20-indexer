@@ -35,6 +35,10 @@ function insert(buffer: TransactionRawData[]) {
   });
 }
 
+emitter.on('cursor', async (cursor) => {
+  saveCursor(cursor);
+});
+
 emitter.on("anyMessage", async (message: any, cursor, clock) => {
   if ( !clock.timestamp ) return;
   const native_block_id = clock.id;
@@ -115,7 +119,6 @@ emitter.on("anyMessage", async (message: any, cursor, clock) => {
     if ( SAVE_ON_DATABASE ) {
       insert([...transactions]);
     }
-    saveCursor(cursor);
     transactions.length = 0; // empty buffer memory
   }
 
