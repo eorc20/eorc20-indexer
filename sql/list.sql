@@ -1,6 +1,6 @@
 -- table --
-DROP TABLE IF EXISTS transfer;
-CREATE TABLE transfer
+DROP TABLE IF EXISTS list;
+CREATE TABLE list
 (
     id                      FixedString(66),
     from                    FixedString(42),
@@ -19,8 +19,8 @@ ENGINE = ReplacingMergeTree
 ORDER BY (id);
 
 -- view --
-DROP TABLE IF EXISTS transfer_mv;
-CREATE MATERIALIZED VIEW transfer_mv TO transfer AS
+DROP TABLE IF EXISTS list_mv;
+CREATE MATERIALIZED VIEW list_mv TO list AS
 SELECT
     id,
     from,
@@ -33,18 +33,18 @@ SELECT
     native_block_number,
     native_block_id,
     timestamp,
-    transaction_index,
+    transaction_index
 FROM data_json
 WHERE
     p = 'eorc20' AND
-    op = 'transfer' AND
+    op = 'list' AND
     notEmpty(tick) AND
     notEmpty(amt) AND
     toInt128(amt) > 0 AND
     toInt128(amt) <= 18446744073709551615;
 
 -- insert --
-INSERT INTO transfer SELECT
+INSERT INTO list SELECT
     id,
     from,
     to,
@@ -56,11 +56,11 @@ INSERT INTO transfer SELECT
     native_block_number,
     native_block_id,
     timestamp,
-    transaction_index,
+    transaction_index
 FROM data_json
 WHERE
     p = 'eorc20' AND
-    op = 'transfer' AND
+    op = 'list' AND
     notEmpty(tick) AND
     notEmpty(amt) AND
     toInt128(amt) > 0 AND

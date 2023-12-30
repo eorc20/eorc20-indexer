@@ -1,38 +1,30 @@
 -- view --
-DROP TABLE IF EXISTS transfer_sum_mv;
+DROP TABLE IF EXISTS mint_sum_mv;
 
-CREATE MATERIALIZED VIEW transfer_sum_mv
+CREATE MATERIALIZED VIEW mint_sum_mv
 ENGINE = SummingMergeTree
-ORDER BY (from, to, tick)
+PRIMARY KEY (from, tick)
 AS SELECT
     from,
-    to,
     tick,
     sum(amt) as amt,
     count(id) as transactions,
     first_value(timestamp) as first_timestamp,
     last_value(timestamp) as last_timestamp
-FROM transfer
-WHERE id IN (SELECT id FROM approve)
-GROUP BY
-    from,
-    to,
-    tick;
+FROM mint
+WHERE id IN (SELECT id FROM approve_mint)
+GROUP BY from, tick;
 
-OPTIMIZE TABLE transfer_sum_mv FINAL;
+OPTIMIZE TABLE mint_sum_mv FINAL;
 
 -- insert --
-INSERT INTO transfer_sum_mv SELECT
+INSERT INTO mint_sum_mv SELECT
     from,
-    to,
     tick,
     sum(amt) as amt,
     count(id) as transactions,
     first_value(timestamp) as first_timestamp,
     last_value(timestamp) as last_timestamp
-FROM transfer
-WHERE id IN (SELECT id FROM approve)
-GROUP BY
-    from,
-    to,
-    tick;
+FROM mint
+WHERE id IN (SELECT id FROM approve_mint)
+GROUP BY from, tick;

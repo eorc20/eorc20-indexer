@@ -34,6 +34,7 @@ HOST=http://localhost:8123
 
 # Indexer settings
 START_BLOCK=349099829
+CURSOR_FILENAME=cursor.lock
 PAUSED=false
 SAVE_ON_DISK=false
 SAVE_ON_DATABASE=true

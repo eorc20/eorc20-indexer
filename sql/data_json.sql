@@ -9,6 +9,7 @@ CREATE TABLE data_json
     mimetype                LowCardinality(String),
     block_number            UInt32(),
     native_block_number     UInt32(),
+    native_block_id         FixedString(64),
     timestamp               DateTime,
     transaction_index       UInt32(),
 )
@@ -26,6 +27,7 @@ SELECT
     mimetype,
     block_number,
     native_block_number,
+    native_block_id,
     timestamp,
     transaction_index,
 FROM transactions;
@@ -39,6 +41,7 @@ INSERT INTO data_json SELECT
     mimetype,
     block_number,
     native_block_number,
+    native_block_id,
     timestamp,
-    transaction_index,
+    transaction_index
 FROM transactions;

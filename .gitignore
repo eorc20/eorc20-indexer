@@ -11,6 +11,7 @@ cursor.lock
 *.csv
 .DS_Store
 data
+*.gz
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

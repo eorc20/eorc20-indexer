@@ -11,6 +11,7 @@ CREATE TABLE mint
     amt                         UInt64,
     block_number                UInt32(),
     native_block_number         UInt32(),
+    native_block_id         FixedString(64),
     timestamp                   DateTime,
     transaction_index           UInt32()
 )
@@ -30,8 +31,9 @@ SELECT
     visitParamExtractString(data, 'amt') as amt,
     block_number,
     native_block_number,
+    native_block_id,
     timestamp,
-    transaction_index,
+    transaction_index
 FROM data_json
 WHERE
     p = 'eorc20' AND
@@ -52,8 +54,9 @@ INSERT INTO mint SELECT
     visitParamExtractString(data, 'amt') as amt,
     block_number,
     native_block_number,
+    native_block_id,
     timestamp,
-    transaction_index,
+    transaction_index
 FROM data_json
 WHERE
     p = 'eorc20' AND

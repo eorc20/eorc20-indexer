@@ -12,6 +12,7 @@ CREATE TABLE deploy
     lim                     UInt64,
     block_number            UInt32(),
     native_block_number     UInt32(),
+    native_block_id         FixedString(64),
     timestamp               DateTime,
     transaction_index       UInt32()
 )
@@ -32,6 +33,7 @@ SELECT
     visitParamExtractString(data, 'lim') as lim,
     block_number,
     native_block_number,
+    native_block_id,
     timestamp,
     transaction_index
 FROM data_json
@@ -60,6 +62,7 @@ INSERT INTO deploy SELECT
     visitParamExtractString(data, 'lim') as lim,
     block_number,
     native_block_number,
+    native_block_id,
     timestamp,
     transaction_index
 FROM data_json
