@@ -65,7 +65,7 @@ export function parseOpCodeFromHex(data: Hex) {
 }
 
 export function parseOpCode(content: string): TransferOpCode | MintOpCode | DeployOpCode | null {
-    const opCode = content.split(/data:[application\/json]?,/)[1].replace(/\u0000/g, "");
+    const opCode = content.split(/data:[application\/json]?,/)[1]?.replace(/\u0000/g, "");
     if ( !opCode ) return null;
     try {
         const parsedOp = JSON.parse(opCode);
