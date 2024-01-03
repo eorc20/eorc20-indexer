@@ -11,7 +11,7 @@ CREATE TABLE mint
     amt                         UInt64,
     block_number                UInt32(),
     native_block_number         UInt32(),
-    native_block_id         FixedString(64),
+    native_block_id             FixedString(64),
     timestamp                   DateTime,
     transaction_index           UInt32()
 )
